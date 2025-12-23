@@ -192,3 +192,64 @@ exports.getOrderStats = async (request, response) => {
         });
     }
 };
+
+/**
+ * Cancel an order
+ * Users can only cancel orders that are in 'pending' or 'processing' status
+ */
+exports.cancelOrder = async (request, response) => {
+    try {
+        const userId = request.user.id;
+        const { orderId } = request.params;
+
+        // Validate order ID
+        if (!orderId) {
+            return response.status(400).json({
+                success: false,
+                message: "Order ID is required"
+            });
+        }
+
+        // Fetch the order to check ownership and status
+        const [orders] = await db.execute(
+            'SELECT id, order_status FROM orders WHERE id = ? AND user_id = ?',
+            [orderId, userId]
+        );
+
+        if (orders.length === 0) {
+            return response.status(404).json({
+                success: false,
+                message: "Order not found"
+            });
+        }
+
+        const order = orders[0];
+
+        // Check if order can be cancelled
+        const cancellableStatuses = ['pending', 'processing'];
+        if (!cancellableStatuses.includes(order.order_status)) {
+            return response.status(400).json({
+                success: false,
+                message: `Cannot cancel order with status: ${order.order_status}. Only pending or processing orders can be cancelled.`
+            });
+        }
+
+        // Update order status to cancelled
+        await db.execute(
+            'UPDATE orders SET order_status = ? WHERE id = ?',
+            ['cancelled', orderId]
+        );
+
+        return response.status(200).json({
+            success: true,
+            message: "Order cancelled successfully"
+        });
+
+    } catch (error) {
+        console.error('Cancel order error:', error);
+        return response.status(500).json({
+            success: false,
+            message: "Failed to cancel order"
+        });
+    }
+};

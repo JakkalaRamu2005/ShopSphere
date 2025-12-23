@@ -5,7 +5,8 @@ const verifyToken = require("../middleware/verifyToken");
 const {
     getUserOrders,
     getOrderById,
-    getOrderStats
+    getOrderStats,
+    cancelOrder
 } = require("../controllers/orderController");
 
 // Apply authentication middleware to all routes
@@ -31,5 +32,12 @@ router.get('/stats', getOrderStats);
  * @access  Private
  */
 router.get('/:orderId', getOrderById);
+
+/**
+ * @route   PUT /orders/:orderId/cancel
+ * @desc    Cancel an order
+ * @access  Private
+ */
+router.put('/:orderId/cancel', cancelOrder);
 
 module.exports = router;

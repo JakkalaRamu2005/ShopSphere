@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../../config/api";
 import { useAuth } from "../AuthContext";
+import AddressManagement from "./AddressManagement";
 import "./userprofile.css";
 
 /**
@@ -451,6 +452,9 @@ function UserProfile() {
                         </button>
                     </div>
                 </div>
+
+                {/* Address Management Card */}
+                <AddressManagement />
             </div>
         </div>
     );

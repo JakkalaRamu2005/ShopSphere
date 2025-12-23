@@ -83,6 +83,40 @@ function OrderHistory() {
     };
 
     /**
+     * Cancel an order
+     */
+    const cancelOrder = async (orderId, orderStatus) => {
+        // Check if order can be cancelled
+        if (!['pending', 'processing'].includes(orderStatus.toLowerCase())) {
+            alert(`Cannot cancel order with status: ${orderStatus}`);
+            return;
+        }
+
+        if (!confirm('Are you sure you want to cancel this order?')) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/orders/${orderId}/cancel`, {
+                method: 'PUT',
+                credentials: 'include'
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert('Order cancelled successfully!');
+                fetchOrders(); // Refresh orders list
+            } else {
+                alert(data.message || 'Failed to cancel order');
+            }
+        } catch (error) {
+            console.error('Cancel order error:', error);
+            alert('Failed to cancel order. Please try again.');
+        }
+    };
+
+    /**
      * Format date to readable string
      */
     const formatDate = (dateString) => {
@@ -221,12 +255,22 @@ function OrderHistory() {
                                     <span>Total Amount:</span>
                                     <strong>₹{parseFloat(order.total_amount).toFixed(2)}</strong>
                                 </div>
-                                <button
-                                    onClick={() => viewOrderDetails(order.id)}
-                                    className="btn-view-details"
-                                >
-                                    View Details
-                                </button>
+                                <div className="order-actions">
+                                    <button
+                                        onClick={() => viewOrderDetails(order.id)}
+                                        className="btn-view-details"
+                                    >
+                                        View Details
+                                    </button>
+                                    {['pending', 'processing'].includes(order.order_status.toLowerCase()) && (
+                                        <button
+                                            onClick={() => cancelOrder(order.id, order.order_status)}
+                                            className="btn-cancel-order"
+                                        >
+                                            Cancel Order
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     ))}

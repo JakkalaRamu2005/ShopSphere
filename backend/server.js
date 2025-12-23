@@ -8,6 +8,11 @@ const cartRoutes = require('./routes/cart');
 const wishlistRoutes = require("./routes/wishlist");
 const checkoutRoutes = require("./routes/checkout");
 const orderRoutes = require("./routes/orders");
+const reviewRoutes = require("./routes/reviews");
+const adminRoutes = require("./routes/admin");
+const paymentRoutes = require("./routes/payment");
+const addressRoutes = require("./routes/address");
+const couponRoutes = require("./routes/coupon");
 const app = express();
 app.use(cookieParser());
 app.use(
@@ -38,11 +43,17 @@ app.use(cors(corsOptions));
 // app.use(bodyParser.json());
 app.use('/auth', authRoutes);
 app.use('/cart', cartRoutes);
-app.use('./wishlist', wishlistRoutes);
+app.use('/wishlist', wishlistRoutes);
 app.use("/checkout", checkoutRoutes);
 app.use("/orders", orderRoutes);
+app.use("/reviews", reviewRoutes);
+app.use("/admin", adminRoutes);
+app.use("/payment", paymentRoutes);
+app.use("/address", addressRoutes);
+app.use("/coupon", couponRoutes);
 
-const PORT = process.env.PORT || 1234;
+
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
     console.log(`Server is running at http://localhost:${PORT}/`)
 })

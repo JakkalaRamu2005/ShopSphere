@@ -1,6 +1,7 @@
 const db = require('../db');
 const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
+const { sendWelcomeEmail } = require('../services/emailService');
 
 async function findUserByEmail(email) {
     const [rows] = await db.execute('SELECT * FROM users WHERE email = ?', [email]);
@@ -27,6 +28,12 @@ exports.register = async (request, response) => {
             [name || null, email, hashedPassword]
 
         );
+
+        // Send welcome email (don't wait for it to complete)
+        sendWelcomeEmail(email, name || 'User').catch(err =>
+            console.error('Failed to send welcome email:', err)
+        );
+
         return response.status(201).json({ message: "User registered successfully" });
 
     } catch (error) {
@@ -39,7 +46,7 @@ exports.register = async (request, response) => {
 exports.login = async (request, response) => {
     try {
         const { email, password } = request.body;
-        console.log(request.body);
+
         if (!email || !password) {
             return response.status(400).json({ message: "Email and password are required" });
         }
@@ -93,7 +100,7 @@ exports.getUserProfile = async (request, response) => {
         const userId = request.user.id;
 
         const [rows] = await db.execute(
-            'SELECT id, name, email, created_at, updated_at FROM users WHERE id = ?',
+            'SELECT id, name, email, role, status, created_at, updated_at FROM users WHERE id = ?',
             [userId]
         );
 

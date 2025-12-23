@@ -414,3 +414,38 @@
         align-items: center;
     }
 }
+/* Order Actions */
+.order-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn-cancel-order {
+    background: transparent;
+    color: #dc3545;
+    border: 2px solid #dc3545;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel-order:hover {
+    background: #dc3545;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+}
+
+@media (max-width: 768px) {
+    .order-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .btn-cancel-order {
+        width: 100%;
+    }
+}

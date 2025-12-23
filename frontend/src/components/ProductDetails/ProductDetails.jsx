@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import "./productdetails.css";
 import { useCart } from "../CartContext";
+import ProductReviews from "../Reviews/ProductReviews";
 
 function ProductDetails() {
   const { id } = useParams();
@@ -27,7 +28,7 @@ function ProductDetails() {
   const handleAddToCart = () => {
     addToCart(product);
     setAddedToCart(true);
-    
+
     // Reset button after 2 seconds
     setTimeout(() => {
       setAddedToCart(false);
@@ -64,7 +65,7 @@ function ProductDetails() {
       {/* Content Section */}
       <div className="details-content">
         <h1 className="details-title">{product.title}</h1>
-        
+
         <p className="details-category">
           <strong>Category:</strong> {product.category}
         </p>
@@ -97,19 +98,22 @@ function ProductDetails() {
 
         {/* Button Group */}
         <div className="button-group">
-          <button 
-            onClick={handleAddToCart} 
+          <button
+            onClick={handleAddToCart}
             className="details-add-to-cart-btn"
             disabled={addedToCart}
           >
             {addedToCart ? "✓ Added to Cart!" : "🛒 Add to Cart"}
           </button>
-          
+
           <Link to="/products" className="details-back-button">
             ← Back to Products
           </Link>
         </div>
       </div>
+
+      {/* Reviews Section */}
+      <ProductReviews productId={id} />
     </div>
   );
 }

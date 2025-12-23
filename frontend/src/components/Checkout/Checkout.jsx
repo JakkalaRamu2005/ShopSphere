@@ -9,6 +9,9 @@ function Checkout() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponError, setCouponError] = useState('');
 
   const [shippingAddress, setShippingAddress] = useState({
     fullName: "",
@@ -21,6 +24,48 @@ function Checkout() {
   });
 
   const [paymentMethod, setPaymentMethod] = useState("cod");
+
+  const getSubtotal = () => getCartTotal();
+  const getDiscount = () => appliedCoupon ? appliedCoupon.discountAmount : 0;
+  const getFinalTotal = () => getSubtotal() - getDiscount();
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) {
+      setCouponError('Please enter a coupon code');
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/coupon/validate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          code: couponCode,
+          orderAmount: getSubtotal()
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setAppliedCoupon(data.coupon);
+        setCouponError('');
+      } else {
+        setCouponError(data.message);
+        setAppliedCoupon(null);
+      }
+    } catch (error) {
+      console.error('Coupon validation error:', error);
+      setCouponError('Failed to validate coupon');
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode('');
+    setCouponError('');
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -90,7 +135,9 @@ function Checkout() {
           shippingAddress,
           paymentMethod,
           cartItems,
-          totalAmount: getCartTotal(),
+          totalAmount: getFinalTotal(),
+          couponCode: appliedCoupon ? appliedCoupon.code : null,
+          discountAmount: getDiscount()
         }),
       });
 
@@ -293,7 +340,7 @@ function Checkout() {
             </div>
 
             <button type="submit" className="place-order-btn" disabled={loading}>
-              {loading ? "Placing Order..." : `Place Order - ₹${getCartTotal().toFixed(2)}`}
+              {loading ? "Placing Order..." : `Place Order - ₹${getFinalTotal().toFixed(2)}`}
             </button>
           </form>
         </div>
@@ -317,16 +364,57 @@ function Checkout() {
           <div className="summary-totals">
             <div className="summary-row">
               <span>Subtotal ({cartItems.length} items)</span>
-              <span>₹{getCartTotal().toFixed(2)}</span>
+              <span>₹{getSubtotal().toFixed(2)}</span>
             </div>
             <div className="summary-row">
               <span>Shipping</span>
               <span className="free-badge">Free</span>
             </div>
+            {appliedCoupon && (
+              <div className="summary-row discount">
+                <span>Discount ({appliedCoupon.code})</span>
+                <span className="discount-amount">-₹{getDiscount().toFixed(2)}</span>
+              </div>
+            )}
             <div className="summary-row total">
               <span>Total</span>
-              <span>₹{getCartTotal().toFixed(2)}</span>
+              <span>₹{getFinalTotal().toFixed(2)}</span>
             </div>
+          </div>
+
+          {/* Coupon Section */}
+          <div className="coupon-section">
+            <h3>Have a Coupon?</h3>
+            {!appliedCoupon ? (
+              <div className="coupon-input-group">
+                <input
+                  type="text"
+                  placeholder="Enter coupon code"
+                  value={couponCode}
+                  onChange={(e) => {
+                    setCouponCode(e.target.value.toUpperCase());
+                    setCouponError('');
+                  }}
+                  className="coupon-input"
+                />
+                <button onClick={handleApplyCoupon} className="apply-coupon-btn">
+                  Apply
+                </button>
+              </div>
+            ) : (
+              <div className="applied-coupon">
+                <span className="coupon-badge">
+                  🎉 {appliedCoupon.code} Applied!
+                </span>
+                <button onClick={handleRemoveCoupon} className="remove-coupon-btn">
+                  ✕
+                </button>
+              </div>
+            )}
+            {couponError && <p className="coupon-error">{couponError}</p>}
+            {appliedCoupon && (
+              <p className="coupon-success">You saved ₹{getDiscount().toFixed(2)}!</p>
+            )}
           </div>
 
           <div className="trust-badges">

@@ -1,18 +1,40 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { FaShoppingCart, FaBars, FaTimes } from 'react-icons/fa';
+import { FaShoppingCart, FaBars, FaTimes, FaUser, FaBox, FaUserEdit, FaSignOutAlt, FaHeart } from 'react-icons/fa';
 import { useAuth } from "../AuthContext";
 import { useCart } from "../CartContext";
+import { useWishlist } from "../WishlistContext";
 import API_URL from "../../config/api";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import "./navbar.css";
 
 function Navbar() {
-  const { isLoggedIn, setIsLoggedIn } = useAuth();
+  const { isLoggedIn, setIsLoggedIn, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { getCartCount } = useCart();
+  const { getWishlistCount } = useWishlist();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const profileDropdownRef = useRef(null);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
+        setIsProfileDropdownOpen(false);
+      }
+    };
+
+    if (isProfileDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isProfileDropdownOpen]);
+
+  // Early return AFTER all hooks
   if (!isLoggedIn) return null;
 
   const handleLogout = async () => {
@@ -29,6 +51,7 @@ function Navbar() {
   };
 
   const cartCount = getCartCount();
+  const wishlistCount = getWishlistCount();
 
   // Check if current route is active
   const isActive = (path) => location.pathname === path;
@@ -36,6 +59,17 @@ function Navbar() {
   // Close menu when a link is clicked
   const handleLinkClick = () => {
     setIsMobileMenuOpen(false);
+  };
+
+  // Toggle profile dropdown
+  const toggleProfileDropdown = () => {
+    setIsProfileDropdownOpen(!isProfileDropdownOpen);
+  };
+
+  // Handle profile dropdown navigation
+  const handleProfileNavigation = (path) => {
+    navigate(path);
+    setIsProfileDropdownOpen(false);
   };
 
   return (
@@ -79,20 +113,6 @@ function Navbar() {
           >
             Products
           </Link>
-          <Link
-            to="/orders"
-            className={`nav-link ${isActive('/orders') ? 'active' : ''}`}
-            onClick={handleLinkClick}
-          >
-            Orders
-          </Link>
-          <Link
-            to="/profile"
-            className={`nav-link ${isActive('/profile') ? 'active' : ''}`}
-            onClick={handleLinkClick}
-          >
-            Profile
-          </Link>
         </div>
 
         {/* Navigation Links - Desktop */}
@@ -115,18 +135,14 @@ function Navbar() {
           >
             Products
           </Link>
-          <Link
-            to="/orders"
-            className={`nav-link ${isActive('/orders') ? 'active' : ''}`}
-          >
-            Orders
-          </Link>
-          <Link
-            to="/profile"
-            className={`nav-link ${isActive('/profile') ? 'active' : ''}`}
-          >
-            Profile
-          </Link>
+          {user?.role === 'admin' && (
+            <Link
+              to="/admin"
+              className={`nav-link ${isActive('/admin') ? 'active' : ''}`}
+            >
+              ⚙️ Admin
+            </Link>
+          )}
         </div>
 
         {/* Right Side Actions */}
@@ -142,10 +158,64 @@ function Navbar() {
             <span className="cart-text">Cart</span>
           </Link>
 
-          {/* Logout Button */}
-          <button onClick={handleLogout} className="logout-btn">
-            Logout
-          </button>
+          {/* Wishlist Icon with Badge */}
+          <Link to="/wishlist" className="wishlist-link" onClick={handleLinkClick}>
+            <div className="wishlist-icon-wrapper">
+              <FaHeart size={22} />
+              {wishlistCount > 0 && (
+                <span className="wishlist-badge">{wishlistCount}</span>
+              )}
+            </div>
+            <span className="wishlist-text">Wishlist</span>
+          </Link>
+
+          {/* Profile Dropdown */}
+          <div className="profile-dropdown-container" ref={profileDropdownRef}>
+            <button
+              className="profile-btn"
+              onClick={toggleProfileDropdown}
+              aria-label="Profile menu"
+            >
+              <FaUser size={18} />
+              <span className="profile-name">{user?.name || 'Profile'}</span>
+            </button>
+
+            {/* Dropdown Menu */}
+            {isProfileDropdownOpen && (
+              <div className="profile-dropdown-menu">
+                <div className="dropdown-header">
+                  <FaUser size={20} />
+                  <div className="dropdown-user-info">
+                    <span className="dropdown-user-name">{user?.name || 'User'}</span>
+                    <span className="dropdown-user-email">{user?.email}</span>
+                  </div>
+                </div>
+                <div className="dropdown-divider"></div>
+                <button
+                  className="dropdown-item"
+                  onClick={() => handleProfileNavigation('/orders')}
+                >
+                  <FaBox size={16} />
+                  <span>My Orders</span>
+                </button>
+                <button
+                  className="dropdown-item"
+                  onClick={() => handleProfileNavigation('/profile')}
+                >
+                  <FaUserEdit size={16} />
+                  <span>Edit Profile</span>
+                </button>
+                <div className="dropdown-divider"></div>
+                <button
+                  className="dropdown-item logout-item"
+                  onClick={handleLogout}
+                >
+                  <FaSignOutAlt size={16} />
+                  <span>Logout</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

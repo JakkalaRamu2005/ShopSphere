@@ -738,3 +738,80 @@
   }
 }
 
+
+/* Coupon Section */
+.coupon-section {
+    margin: 1.5rem 0;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.coupon-section h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1rem;
+    color: #333;
+}
+
+.coupon-input-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.coupon-input {
+    flex: 1;
+    padding: 0.8rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    text-transform: uppercase;
+}
+
+.apply-coupon-btn {
+    padding: 0.8rem 1.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.applied-coupon {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.8rem;
+    background: #d4edda;
+    border-radius: 8px;
+}
+
+.coupon-badge {
+    color: #155724;
+    font-weight: 600;
+}
+
+.remove-coupon-btn {
+    background: transparent;
+    border: none;
+    color: #155724;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+
+.coupon-error {
+    color: #dc3545;
+    margin: 0.5rem 0 0 0;
+    font-size: 0.9rem;
+}
+
+.coupon-success {
+    color: #28a745;
+    margin: 0.5rem 0 0 0;
+    font-weight: 600;
+}
+
+.discount-amount {
+    color: #28a745;
+    font-weight: 700;
+}
