@@ -7,6 +7,7 @@ const authRoutes = require('./routes/auth');
 const cartRoutes = require('./routes/cart');
 const wishlistRoutes = require("./routes/wishlist");
 const checkoutRoutes = require("./routes/checkout");
+const orderRoutes = require("./routes/orders");
 const app = express();
 app.use(cookieParser());
 app.use(
@@ -14,7 +15,7 @@ app.use(
 )
 
 // CORS Configuration for Development
-// CORS Configuration
+// CORS Configuration (Development only)
 const corsOptions = {
     origin: function (origin, callback) {
         // Allow requests with no origin (Postman, curl, mobile apps)
@@ -25,11 +26,6 @@ const corsOptions = {
             return callback(null, true);
         }
 
-        // Allow deployed frontend
-        if (origin === 'https://mernproject-theta-one.vercel.app') {
-            return callback(null, true);
-        }
-
         callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
@@ -37,12 +33,14 @@ const corsOptions = {
     allowedHeaders: ['Content-Type', 'Authorization']
 };
 
+
 app.use(cors(corsOptions));
 // app.use(bodyParser.json());
 app.use('/auth', authRoutes);
 app.use('/cart', cartRoutes);
 app.use('./wishlist', wishlistRoutes);
 app.use("/checkout", checkoutRoutes);
+app.use("/orders", orderRoutes);
 
 const PORT = process.env.PORT || 1234;
 app.listen(PORT, () => {

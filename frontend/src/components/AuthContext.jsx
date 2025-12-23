@@ -7,9 +7,9 @@ const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
 
-
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [user, setUser] = useState(null);
 
     useEffect(() => {
         fetch(`${API_URL}/auth/profile`, {
@@ -18,14 +18,18 @@ const AuthProvider = ({ children }) => {
         })
             .then(res => {
                 if (res.ok) {
-                    setIsLoggedIn(true);
-
+                    return res.json();
                 } else {
-                    setIsLoggedIn(false);
+                    throw new Error('Not authenticated');
                 }
+            })
+            .then(data => {
+                setIsLoggedIn(true);
+                setUser(data.user);
             })
             .catch(() => {
                 setIsLoggedIn(false);
+                setUser(null);
             })
             .finally(() => {
                 setLoading(false);
@@ -46,6 +50,15 @@ const AuthProvider = ({ children }) => {
 
             if (res.ok) {
                 setIsLoggedIn(true);
+                // Fetch user profile after login
+                const profileRes = await fetch(`${API_URL}/auth/profile`, {
+                    method: "GET",
+                    credentials: "include",
+                });
+                if (profileRes.ok) {
+                    const profileData = await profileRes.json();
+                    setUser(profileData.user);
+                }
                 return { success: true, message: data.message };
             } else {
                 return { success: false, message: data.message };
@@ -55,8 +68,12 @@ const AuthProvider = ({ children }) => {
         }
     }
 
+    const updateUser = (updatedUser) => {
+        setUser(updatedUser);
+    }
+
     return (
-        <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn, loading, login }}>{children}</AuthContext.Provider>
+        <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn, loading, login, user, updateUser }}>{children}</AuthContext.Provider>
     )
 
 }

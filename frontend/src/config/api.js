@@ -1,4 +1,6 @@
 // API Configuration
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:1234';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
-export default API_URL;
+// Export both as default and named export for flexibility
+export { API_BASE_URL };
+export default API_BASE_URL;

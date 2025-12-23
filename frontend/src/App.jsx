@@ -12,6 +12,10 @@ import Cart from "./components/Cart/Cart"
 import Products from "./components/Products/Products";
 import ProductDetails from "./components/ProductDetails/ProductDetails";
 import Checkout from "./components/Checkout/Checkout";
+import OrderHistory from "./components/OrderHistory/OrderHistory";
+import OrderDetails from "./components/OrderDetails/OrderDetails";
+import UserProfile from "./components/UserProfile/UserProfile";
+
 
 
 
@@ -34,7 +38,10 @@ function App() {
               <Route path="products" element={<Products />}></Route>
               <Route path="/about" element={<About />}></Route>
               <Route path="/products/:id" element={<ProductDetails />} />
-              <Route path="/checkout" element={<Checkout/>}/>
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/orders" element={<OrderHistory />} />
+              <Route path="/orders/:orderId" element={<OrderDetails />} />
+              <Route path="/profile" element={<UserProfile />} />
             </Route>
 
 

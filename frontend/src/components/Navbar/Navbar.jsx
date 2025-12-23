@@ -48,7 +48,7 @@ function Navbar() {
         </Link>
 
         {/* Hamburger Menu Button */}
-        <button 
+        <button
           className="hamburger-btn"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           aria-label="Toggle menu"
@@ -79,6 +79,20 @@ function Navbar() {
           >
             Products
           </Link>
+          <Link
+            to="/orders"
+            className={`nav-link ${isActive('/orders') ? 'active' : ''}`}
+            onClick={handleLinkClick}
+          >
+            Orders
+          </Link>
+          <Link
+            to="/profile"
+            className={`nav-link ${isActive('/profile') ? 'active' : ''}`}
+            onClick={handleLinkClick}
+          >
+            Profile
+          </Link>
         </div>
 
         {/* Navigation Links - Desktop */}
@@ -100,6 +114,18 @@ function Navbar() {
             className={`nav-link ${isActive('/products') ? 'active' : ''}`}
           >
             Products
+          </Link>
+          <Link
+            to="/orders"
+            className={`nav-link ${isActive('/orders') ? 'active' : ''}`}
+          >
+            Orders
+          </Link>
+          <Link
+            to="/profile"
+            className={`nav-link ${isActive('/profile') ? 'active' : ''}`}
+          >
+            Profile
           </Link>
         </div>
 
@@ -125,7 +151,7 @@ function Navbar() {
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div 
+        <div
           className="mobile-menu-overlay"
           onClick={() => setIsMobileMenuOpen(false)}
         ></div>

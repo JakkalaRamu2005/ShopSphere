@@ -99,7 +99,7 @@ function Checkout() {
       if (response.ok) {
         alert(`Order placed successfully! Order ID: ${data.orderId}`);
         clearCart();
-        navigate("/");
+        navigate("/orders");
       } else {
         alert(data.message || "Failed to place order");
       }

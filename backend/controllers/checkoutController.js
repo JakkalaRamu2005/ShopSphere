@@ -10,10 +10,20 @@ exports.createOrder = async (request, response) => {
             return response.status(400).json({ message: "All fields are required" });
         }
 
+        // Normalize shipping address format
+        const normalizedAddress = {
+            fullName: shippingAddress.fullName,
+            phone: shippingAddress.phoneNumber,
+            address: `${shippingAddress.addressLine1}${shippingAddress.addressLine2 ? ', ' + shippingAddress.addressLine2 : ''}`,
+            city: shippingAddress.city,
+            state: shippingAddress.state,
+            pincode: shippingAddress.pincode
+        };
+
         // Insert order into database
         const [orderResult] = await db.execute(
             'INSERT INTO orders (user_id, total_amount, shipping_address, payment_method, order_status) VALUES (?, ?, ?, ?, ?)',
-            [userId, totalAmount, JSON.stringify(shippingAddress), paymentMethod, 'pending']
+            [userId, totalAmount, JSON.stringify(normalizedAddress), paymentMethod, 'pending']
         );
 
         const orderId = orderResult.insertId;
