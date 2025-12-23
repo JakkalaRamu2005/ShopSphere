@@ -16,6 +16,8 @@
   z-index: 1000;
   box-shadow: var(--shadow);
   transition: var(--transition);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Nav Content Container */
@@ -27,6 +29,9 @@
   justify-content: space-between;
   align-items: center;
   gap: 2rem;
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
 }
 
 /* Brand/Logo Section */
@@ -322,24 +327,275 @@
     padding: 0.5rem 1rem;
   }
 
-  .nav-links {
-    border-top: none;
-    padding-top: 0;
+}
+
+/* ==================== HAMBURGER MENU STYLES ==================== */
+
+/* Hamburger Button - Hidden on Desktop */
+.hamburger-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-light);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: var(--transition);
+  z-index: 1001;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+}
+
+.hamburger-btn:hover {
+  transform: scale(1.1);
+}
+
+/* Mobile Menu Container */
+.nav-links-mobile {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: var(--primary-color);
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  z-index: 999;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.nav-links-mobile.open {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.nav-links-mobile .nav-link {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: left;
+  position: relative;
+  border-radius: 0;
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 1rem;
+}
+
+.nav-links-mobile .nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.nav-links-mobile .nav-link.active {
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+.nav-links-mobile .nav-link.active::after {
+  display: none;
+}
+
+/* Mobile Menu Overlay (for closing menu when clicking outside) */
+.mobile-menu-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0);
+  z-index: 998;
+}
+
+/* ==================== MOBILE RESPONSIVENESS ==================== */
+
+/* Large Mobile (600px - 768px) */
+@media (max-width: 768px) {
+  .nav-container {
+    padding: 0.75rem 1rem;
+    gap: 0;
+    justify-content: flex-start;
   }
 
-  .navbar {
-    position: fixed;
+  /* Hide desktop nav links */
+  .nav-links {
+    display: none;
+  }
+
+  /* Show hamburger button */
+  .hamburger-btn {
+    display: flex;
+  }
+
+  /* Brand takes space needed */
+  .nav-brand {
+    font-size: 1.1rem;
+    flex: 0 0 auto;
+  }
+
+  .brand-icon {
+    font-size: 1.3rem;
+  }
+
+  /* Actions pushed to right */
+  .nav-actions {
+    gap: 0.5rem;
+    margin-left: auto;
+    flex: 0 0 auto;
+  }
+
+  .cart-link {
+    padding: 0.4rem 0.6rem;
+  }
+
+  .cart-text {
+    display: none;
+  }
+
+  .logout-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  /* Mobile menu styles */
+  .nav-links-mobile {
+    display: flex;
+    width: 100%;
   }
 }
 
-/* Touch-Friendly Targets (Minimum 44x44px) */
-@media (max-width: 768px) {
+/* Small Mobile (480px - 600px) */
+@media (max-width: 600px) {
+  .nav-container {
+    padding: 0.65rem 0.75rem;
+  }
+
+  .nav-brand {
+    font-size: 1rem;
+  }
+
+  .brand-icon {
+    font-size: 1.2rem;
+  }
+
+  .brand-text {
+    display: none;
+  }
+
+  .hamburger-btn {
+    font-size: 1.3rem;
+    padding: 0.4rem;
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  .logout-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+  }
+
+  .nav-links-mobile .nav-link {
+    padding: 0.9rem 1.2rem;
+    font-size: 0.95rem;
+  }
+}
+
+/* Extra Small Phones (Under 480px) */
+@media (max-width: 480px) {
+  .nav-container {
+    padding: 0.6rem 0.5rem;
+  }
+
+  .nav-brand {
+    font-size: 0.95rem;
+    gap: 0.3rem;
+  }
+
+  .brand-icon {
+    font-size: 1.1rem;
+  }
+
+  .brand-text {
+    display: none;
+  }
+
+  .hamburger-btn {
+    font-size: 1.2rem;
+    padding: 0.35rem;
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  .nav-actions {
+    gap: 0.3rem;
+  }
+
+  .cart-link {
+    padding: 0.3rem 0.4rem;
+  }
+
+  .logout-btn {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.8rem;
+  }
+
+  .cart-badge {
+    font-size: 9px;
+    min-width: 16px;
+    height: 16px;
+    top: -6px;
+    right: -8px;
+  }
+
+  .nav-links-mobile {
+    max-height: 350px;
+  }
+
+  .nav-links-mobile .nav-link {
+    padding: 0.85rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* Landscape Orientation Optimization */
+@media (max-height: 500px) and (orientation: landscape) {
+  .navbar {
+    position: sticky;
+    top: 0;
+  }
+
+  .nav-container {
+    padding: 0.5rem 1rem;
+    gap: 0.5rem;
+  }
+
+  .nav-links-mobile.open {
+    max-height: 300px;
+    overflow-y: auto;
+  }
+
+  .nav-links-mobile .nav-link {
+    padding: 0.7rem 1.2rem;
+  }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .navbar,
+  .nav-brand,
   .nav-link,
   .cart-link,
-  .logout-btn {
-    min-height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  .logout-btn,
+  .hamburger-btn,
+  .cart-badge,
+  .nav-links-mobile {
+    transition: none;
+    animation: none;
   }
 }
+

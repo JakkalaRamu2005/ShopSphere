@@ -1,5 +1,6 @@
 import { createContext, useState, useContext, useEffect } from "react";
 import { useAuth } from "./AuthContext";
+import API_URL from "../config/api";
 
 const CartContext = createContext();
 
@@ -20,7 +21,7 @@ export const CartProvider = ({ children }) => {
   const fetchCart = async () => {
     try {
       setLoading(true);
-      const response = await fetch("https://emmorce-2qehvpxa8-ramus-projects-a74e5d04.vercel.app/cart", {
+      const response = await fetch(`${API_URL}/cart`, {
         method: "GET",
         credentials: "include",
       });
@@ -54,7 +55,7 @@ export const CartProvider = ({ children }) => {
 
     try {
 
-      const response = await fetch("https://emmorce-2qehvpxa8-ramus-projects-a74e5d04.vercel.app/cart/add", {
+      const response = await fetch(`${API_URL}/cart/add`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -89,7 +90,7 @@ export const CartProvider = ({ children }) => {
     if (!isLoggedIn) return;
 
     try {
-      const response = await fetch(`https://emmorce-2qehvpxa8-ramus-projects-a74e5d04.vercel.app/cart/remove/${productId}`, {
+      const response = await fetch(`${API_URL}/cart/remove/${productId}`, {
         method: "DELETE",
         credentials: "include",
       });
@@ -114,7 +115,7 @@ export const CartProvider = ({ children }) => {
 
     try {
 
-      const response = await fetch("https://emmorce-2qehvpxa8-ramus-projects-a74e5d04.vercel.app/cart/update", {
+      const response = await fetch(`${API_URL}/cart/update`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -144,7 +145,7 @@ export const CartProvider = ({ children }) => {
     if (!isLoggedIn) return;
 
     try {
-      const response = await fetch("https://emmorce-2qehvpxa8-ramus-projects-a74e5d04.vercel.app/cart/clear", {
+      const response = await fetch(`${API_URL}/cart/clear`, {
         method: "DELETE",
         credentials: "include",
       });

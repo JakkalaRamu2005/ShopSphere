@@ -550,6 +550,129 @@
   }
 }
 
+/* Extra Small Mobile Phones (Under 360px) */
+@media (max-width: 360px) {
+  .home-container {
+    padding: 0;
+  }
+
+  .hero-section {
+    padding: 1.2rem 0.5rem;
+    border-radius: 0;
+    min-height: auto;
+    gap: 1.5rem;
+  }
+
+  .hero-title {
+    font-size: 1.6rem;
+  }
+
+  .hero-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .hero-btn {
+    padding: 0.7rem 1.5rem;
+    font-size: 0.95rem;
+  }
+
+  .section-title {
+    font-size: 1.4rem;
+    margin: 1.5rem 0 1rem;
+  }
+
+  .categories-section,
+  .featured-section,
+  .trust-section {
+    padding: 1.5rem 0.5rem;
+  }
+
+  .categories-grid {
+    gap: 1rem;
+  }
+
+  .category-card {
+    padding: 1rem;
+  }
+
+  .category-card h3 {
+    font-size: 1.1rem;
+  }
+
+  .featured-grid {
+    gap: 1rem;
+  }
+
+  .featured-card {
+    padding: 1rem;
+    min-height: 340px;
+  }
+
+  .featured-btn {
+    font-size: 0.9rem;
+  }
+
+  .cta-section {
+    padding: 2.5rem 0.5rem;
+  }
+
+  .cta-section h2 {
+    font-size: 1.5rem;
+  }
+
+  .cta-section p {
+    font-size: 0.95rem;
+  }
+
+  .cta-btn {
+    padding: 0.7rem 1.5rem;
+    font-size: 0.95rem;
+  }
+}
+
+/* Landscape Orientation Optimization */
+@media (max-height: 600px) and (orientation: landscape) {
+  .hero-section {
+    padding: 2rem 2rem;
+    min-height: auto;
+    gap: 2rem;
+  }
+
+  .hero-title {
+    font-size: 2.2rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .categories-section,
+  .featured-section,
+  .trust-section {
+    padding: 1.5rem 2rem;
+  }
+
+  .section-title {
+    margin: 1.5rem 0 1rem;
+    font-size: 1.8rem;
+  }
+
+  .cta-section {
+    padding: 2rem;
+  }
+
+  .cta-section h2 {
+    font-size: 1.8rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .cta-section p {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+}
+
 /* Prevent Horizontal Scroll */
 html,
 body {
@@ -557,3 +680,25 @@ body {
   width: 100%;
   max-width: 100vw;
 }
+
+/* Touch-friendly spacing for mobile */
+@media (max-width: 768px) {
+  body {
+    line-height: 1.6;
+  }
+
+  .home-container {
+    scroll-padding-top: 70px;
+  }
+}
+
+/* Accessibility: Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+

@@ -1,40 +1,41 @@
 import { useState } from "react";
 import "./register.css";
-import { useNavigate, Link,Navigate } from "react-router";
+import { useNavigate, Link, Navigate } from "react-router";
 import { useAuth } from "../AuthContext";
+import API_URL from "../../config/api";
 // import axios from "axios";
 function Register() {
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [msg, setMsg] = useState("");
   const navigate = useNavigate();
-  const {isLoggedIn} = useAuth();
+  const { isLoggedIn } = useAuth();
 
-  if(isLoggedIn){
-    return <Navigate to="/" replace/>;
+  if (isLoggedIn) {
+    return <Navigate to="/" replace />;
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMsg("");
-   try{
-     const res = await fetch("https://emmorce-2qehvpxa8-ramus-projects-a74e5d04.vercel.app/auth/register", {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(form),
-      credentials: "include",
-    });
-    const data = await res.json();
-    if (res.ok) {
-      setMsg("Registration successful! Redirecting to login...");
-      setForm({ name: "", email: "", password: "" });
-      setTimeout(() => navigate("/login"), 1500);
+    try {
+      const res = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(form),
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setMsg("Registration successful! Redirecting to login...");
+        setForm({ name: "", email: "", password: "" });
+        setTimeout(() => navigate("/login"), 1500);
 
-    } else {
-      setMsg(data.message || "Registration failed.");
-    }
-   }catch(error){
+      } else {
+        setMsg(data.message || "Registration failed.");
+      }
+    } catch (error) {
       setMsg("An error occurred. Please try again.")
     }
   };

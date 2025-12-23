@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useCart } from "../CartContext";
 import { useNavigate } from "react-router-dom";
+import API_URL from "../../config/api";
 import "./checkout.css";
 
 function Checkout() {
@@ -27,7 +28,7 @@ function Checkout() {
       ...shippingAddress,
       [name]: value,
     });
-    
+
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors({ ...errors, [name]: "" });
@@ -79,7 +80,7 @@ function Checkout() {
 
     setLoading(true);
     try {
-      const response = await fetch("https://emmorce-2qehvpxa8-ramus-projects-a74e5d04.vercel.app/checkout/create-order", {
+      const response = await fetch(`${API_URL}/checkout/create-order`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

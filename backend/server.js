@@ -13,10 +13,31 @@ app.use(
     express.json()
 )
 
-app.use(cors({
-    origin: 'https://mernproject-76cypxvrl-ramus-projects-a74e5d04.vercel.app/', 
-    credentials: true
-}));
+// CORS Configuration for Development
+// CORS Configuration
+const corsOptions = {
+    origin: function (origin, callback) {
+        // Allow requests with no origin (Postman, curl, mobile apps)
+        if (!origin) return callback(null, true);
+
+        // Allow localhost (development)
+        if (origin.startsWith('http://localhost:')) {
+            return callback(null, true);
+        }
+
+        // Allow deployed frontend
+        if (origin === 'https://mernproject-theta-one.vercel.app') {
+            return callback(null, true);
+        }
+
+        callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
 // app.use(bodyParser.json());
 app.use('/auth', authRoutes);
 app.use('/cart', cartRoutes);

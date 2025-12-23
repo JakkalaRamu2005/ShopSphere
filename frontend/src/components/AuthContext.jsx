@@ -1,41 +1,42 @@
 import { useEffect } from "react";
 import { createContext, useState, useContext } from "react";
+import API_URL from "../config/api";
 
 const AuthContext = createContext();
 
 
-const AuthProvider =({children})=>{
+const AuthProvider = ({ children }) => {
 
 
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [loading, setLoading] = useState(true);
 
-    useEffect(()=>{
-        fetch("https://emmorce-2qehvpxa8-ramus-projects-a74e5d04.vercel.app/auth/profile",{
-            method:"GET",
+    useEffect(() => {
+        fetch(`${API_URL}/auth/profile`, {
+            method: "GET",
             credentials: "include",
         })
-        .then(res=>{
-            if(res.ok){
-                setIsLoggedIn(true);
-                
-            }else{
-                setIsLoggedIn(false);
-            }
-        })
-        .catch(()=>{
-            setIsLoggedIn(false);
-        })
-        .finally(()=>{
-            setLoading(false);
-        })
-    },[]);  
+            .then(res => {
+                if (res.ok) {
+                    setIsLoggedIn(true);
 
-    const login = async (credentials)=>{
-        try{
-            const res = await fetch("https://emmorce-2qehvpxa8-ramus-projects-a74e5d04.vercel.app/auth/login",{
-                method:"POST",
-                headers: {'Content-Type': 'application/json'},
+                } else {
+                    setIsLoggedIn(false);
+                }
+            })
+            .catch(() => {
+                setIsLoggedIn(false);
+            })
+            .finally(() => {
+                setLoading(false);
+            })
+    }, []);
+
+    const login = async (credentials) => {
+        try {
+            const res = await fetch(`${API_URL}/auth/login`, {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(credentials),
                 credentials: "include",
             });
@@ -43,23 +44,23 @@ const AuthProvider =({children})=>{
             const data = await res.json();
             console.log(data);
 
-            if(res.ok){
+            if (res.ok) {
                 setIsLoggedIn(true);
-                return {success: true, message: data.message};
-            }else{
-                return {success: false, message: data.message};
+                return { success: true, message: data.message };
+            } else {
+                return { success: false, message: data.message };
             }
-        }catch(error){
-            return {success: false, message: "An error occurred. Please try again"};
+        } catch (error) {
+            return { success: false, message: "An error occurred. Please try again" };
         }
     }
 
     return (
-        <AuthContext.Provider value={{isLoggedIn, setIsLoggedIn, loading, login}}>{children}</AuthContext.Provider>
+        <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn, loading, login }}>{children}</AuthContext.Provider>
     )
 
 }
 
 export default AuthProvider
 
-export const useAuth =()=> useContext(AuthContext);
+export const useAuth = () => useContext(AuthContext);

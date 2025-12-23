@@ -11,7 +11,7 @@ async function findUserByEmail(email) {
 exports.register = async (request, response) => {
     try {
         const { name, email, password } = request.body;
-
+// console.log(request.body);
         if (!email || !password) {
             return response.status(400).json({ message: "Email and password are required" });
         }
@@ -39,7 +39,7 @@ exports.register = async (request, response) => {
 exports.login = async (request, response) => {
     try {
         const { email, password } = request.body;
-
+console.log(request.body);
         if (!email || !password) {
             return response.status(400).json({ message: "Email and password are required" });
         }

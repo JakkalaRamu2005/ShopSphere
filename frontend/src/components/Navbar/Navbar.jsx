@@ -1,7 +1,9 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { FaShoppingCart } from 'react-icons/fa';
+import { FaShoppingCart, FaBars, FaTimes } from 'react-icons/fa';
 import { useAuth } from "../AuthContext";
 import { useCart } from "../CartContext";
+import API_URL from "../../config/api";
+import { useState } from "react";
 import "./navbar.css";
 
 function Navbar() {
@@ -9,12 +11,13 @@ function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { getCartCount } = useCart();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   if (!isLoggedIn) return null;
 
   const handleLogout = async () => {
     try {
-      await fetch("https://emmorce-2qehvpxa8-ramus-projects-a74e5d04.vercel.app/auth/logout", {
+      await fetch(`${API_URL}/auth/logout`, {
         method: "POST",
         credentials: "include",
       });
@@ -30,31 +33,70 @@ function Navbar() {
   // Check if current route is active
   const isActive = (path) => location.pathname === path;
 
+  // Close menu when a link is clicked
+  const handleLinkClick = () => {
+    setIsMobileMenuOpen(false);
+  };
+
   return (
     <nav className="navbar">
       <div className="nav-container">
         {/* Brand/Logo */}
-        <Link to="/" className="nav-brand">
+        <Link to="/" className="nav-brand" onClick={handleLinkClick}>
           <span className="brand-icon">🛒</span>
           <span className="brand-text">ShopEase</span>
         </Link>
 
-        {/* Navigation Links */}
+        {/* Hamburger Menu Button */}
+        <button 
+          className="hamburger-btn"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          aria-label="Toggle menu"
+        >
+          {isMobileMenuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+        </button>
+
+        {/* Navigation Links - Mobile Menu */}
+        <div className={`nav-links-mobile ${isMobileMenuOpen ? 'open' : ''}`}>
+          <Link
+            to="/"
+            className={`nav-link ${isActive('/') ? 'active' : ''}`}
+            onClick={handleLinkClick}
+          >
+            Home
+          </Link>
+          <Link
+            to="/about"
+            className={`nav-link ${isActive('/about') ? 'active' : ''}`}
+            onClick={handleLinkClick}
+          >
+            About
+          </Link>
+          <Link
+            to="/products"
+            className={`nav-link ${isActive('/products') ? 'active' : ''}`}
+            onClick={handleLinkClick}
+          >
+            Products
+          </Link>
+        </div>
+
+        {/* Navigation Links - Desktop */}
         <div className="nav-links">
-          <Link 
-            to="/" 
+          <Link
+            to="/"
             className={`nav-link ${isActive('/') ? 'active' : ''}`}
           >
             Home
           </Link>
-          <Link 
-            to="/about" 
+          <Link
+            to="/about"
             className={`nav-link ${isActive('/about') ? 'active' : ''}`}
           >
             About
           </Link>
-          <Link 
-            to="/products" 
+          <Link
+            to="/products"
             className={`nav-link ${isActive('/products') ? 'active' : ''}`}
           >
             Products
@@ -64,7 +106,7 @@ function Navbar() {
         {/* Right Side Actions */}
         <div className="nav-actions">
           {/* Cart Icon with Badge */}
-          <Link to="/cart" className="cart-link">
+          <Link to="/cart" className="cart-link" onClick={handleLinkClick}>
             <div className="cart-icon-wrapper">
               <FaShoppingCart size={22} />
               {cartCount > 0 && (
@@ -80,6 +122,14 @@ function Navbar() {
           </button>
         </div>
       </div>
+
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="mobile-menu-overlay"
+          onClick={() => setIsMobileMenuOpen(false)}
+        ></div>
+      )}
     </nav>
   );
 }
