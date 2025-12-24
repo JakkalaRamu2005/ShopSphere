@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../CartContext";
+import Carousel from "../Carousel/Carousel";
 import "./home.css";
 
 function Home() {
@@ -70,28 +71,9 @@ function Home() {
   ];
 
   return (
-    <div className="home-container">
-      {/* Hero Section */}
-      <section className="hero-section">
-        <div className="hero-content">
-          <h1 className="hero-title">Welcome to Our Store</h1>
-          <p className="hero-subtitle">
-            Discover amazing products at unbeatable prices. Shop the latest trends in fashion, electronics, and more!
-          </p>
-          <button className="hero-btn" onClick={handleShopNow}>
-            Shop Now
-          </button>
-        </div>
-        <div className="hero-image">
-          <img
-            src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800"
-            alt="Shopping"
-            onError={(e) => {
-              e.target.style.display = 'none';
-            }}
-          />
-        </div>
-      </section>
+    <div className="home-page">
+      {/* Carousel Hero Section */}
+      <Carousel />
 
       {/* Categories Section */}
       <section className="categories-section">
@@ -104,8 +86,8 @@ function Home() {
               onClick={() => handleCategoryClick(category.name.toLowerCase())}
             >
               <div className="category-image-wrapper">
-                <img 
-                  src={category.image} 
+                <img
+                  src={category.image}
                   alt={category.name}
                   onError={(e) => {
                     e.target.src = 'https://via.placeholder.com/300x200?text=' + category.name;
@@ -133,8 +115,8 @@ function Home() {
                 onClick={() => handleProductClick(product.id)}
               >
                 <div className="featured-image-wrapper">
-                  <img 
-                    src={product.image} 
+                  <img
+                    src={product.image}
                     alt={product.title}
                     onError={(e) => {
                       e.target.src = 'https://via.placeholder.com/200?text=Product';

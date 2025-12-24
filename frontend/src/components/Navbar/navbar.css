@@ -45,6 +45,7 @@
   font-size: 1.3rem;
   transition: var(--transition);
   flex-shrink: 0;
+  min-width: 150px;
 }
 
 .nav-brand:hover {
@@ -59,48 +60,53 @@
   font-weight: 700;
 }
 
-/* Navigation Links Container */
-.nav-links {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
+/* Integrated Navbar Search */
+.navbar-search-container {
   flex: 1;
+  max-width: 600px;
+  margin: 0 2rem;
+}
+
+.navbar-search-wrapper {
+  display: flex;
+  align-items: center;
+  background: white;
+  border-radius: 2px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-search-input {
+  flex: 1;
+  padding: 0.7rem 1rem;
+  border: none;
+  outline: none;
+  font-size: 0.95rem;
+  color: var(--dark-gray);
+}
+
+.navbar-search-input::placeholder {
+  color: #878787;
+}
+
+.navbar-search-btn {
+  background: white;
+  border: none;
+  border-left: 1px solid #f0f0f0;
+  padding: 0.7rem 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
   justify-content: center;
-}
-
-/* Individual Navigation Links */
-.nav-link {
-  color: var(--text-light);
-  text-decoration: none;
-  font-size: 1rem;
-  font-weight: 500;
-  padding: 0.6rem 1.2rem;
-  border-radius: 8px;
-  white-space: nowrap;
   transition: var(--transition);
-  position: relative;
 }
 
-.nav-link:hover {
-  background-color: rgba(255, 255, 255, 0.15);
+.navbar-search-btn svg {
+  stroke: var(--primary-color);
 }
 
-/* Active Link Indicator */
-.nav-link.active {
-  background-color: rgba(255, 255, 255, 0.25);
-  font-weight: 600;
-}
-
-.nav-link.active::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60%;
-  height: 3px;
-  background-color: var(--text-light);
-  border-radius: 2px 2px 0 0;
+.navbar-search-btn:hover {
+  background: var(--light-gray);
 }
 
 /* Right Side Actions Container */
@@ -167,54 +173,6 @@
 }
 
 .cart-text {
-  font-weight: 500;
-  font-size: 1rem;
-}
-
-/* Wishlist Link */
-.wishlist-link {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--text-light);
-  text-decoration: none;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  transition: var(--transition);
-  position: relative;
-}
-
-.wishlist-link:hover {
-  background-color: rgba(255, 255, 255, 0.15);
-}
-
-.wishlist-icon-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-/* Wishlist Badge */
-.wishlist-badge {
-  position: absolute;
-  top: -8px;
-  right: -10px;
-  background-color: #ff4757;
-  color: white;
-  font-size: 11px;
-  font-weight: bold;
-  border-radius: 50%;
-  min-width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 5px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  animation: pulse 2s infinite;
-}
-
-.wishlist-text {
   font-weight: 500;
   font-size: 1rem;
 }
@@ -417,29 +375,29 @@
   /* Brand stays on top left */
   .nav-brand {
     font-size: 1.1rem;
+    min-width: auto;
   }
 
   .brand-icon {
     font-size: 1.3rem;
   }
 
-  /* Links move to bottom, full width */
-  .nav-links {
+  /* Search bar moves to second row, full width */
+  .navbar-search-container {
     order: 3;
     width: 100%;
-    justify-content: space-around;
-    gap: 0.25rem;
-    padding-top: 0.5rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    margin: 0;
+    max-width: 100%;
   }
 
-  .nav-link {
-    padding: 0.5rem 0.8rem;
-    font-size: 0.9rem;
+  .navbar-search-input {
+    font-size: 16px;
+    /* Prevents iOS zoom */
+    padding: 0.6rem 0.8rem;
   }
 
-  .nav-link.active::after {
-    width: 80%;
+  .navbar-search-btn {
+    padding: 0.6rem 1rem;
   }
 
   /* Actions stay on top right */

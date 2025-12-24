@@ -81,68 +81,21 @@ function Navbar() {
           <span className="brand-text">ShopEase</span>
         </Link>
 
-        {/* Hamburger Menu Button */}
-        <button
-          className="hamburger-btn"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          aria-label="Toggle menu"
-        >
-          {isMobileMenuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
-        </button>
-
-        {/* Navigation Links - Mobile Menu */}
-        <div className={`nav-links-mobile ${isMobileMenuOpen ? 'open' : ''}`}>
-          <Link
-            to="/"
-            className={`nav-link ${isActive('/') ? 'active' : ''}`}
-            onClick={handleLinkClick}
-          >
-            Home
-          </Link>
-          <Link
-            to="/about"
-            className={`nav-link ${isActive('/about') ? 'active' : ''}`}
-            onClick={handleLinkClick}
-          >
-            About
-          </Link>
-          <Link
-            to="/products"
-            className={`nav-link ${isActive('/products') ? 'active' : ''}`}
-            onClick={handleLinkClick}
-          >
-            Products
-          </Link>
-        </div>
-
-        {/* Navigation Links - Desktop */}
-        <div className="nav-links">
-          <Link
-            to="/"
-            className={`nav-link ${isActive('/') ? 'active' : ''}`}
-          >
-            Home
-          </Link>
-          <Link
-            to="/about"
-            className={`nav-link ${isActive('/about') ? 'active' : ''}`}
-          >
-            About
-          </Link>
-          <Link
-            to="/products"
-            className={`nav-link ${isActive('/products') ? 'active' : ''}`}
-          >
-            Products
-          </Link>
-          {user?.role === 'admin' && (
-            <Link
-              to="/admin"
-              className={`nav-link ${isActive('/admin') ? 'active' : ''}`}
-            >
-              ⚙️ Admin
-            </Link>
-          )}
+        {/* Integrated Search Bar */}
+        <div className="navbar-search-container">
+          <div className="navbar-search-wrapper">
+            <input
+              type="text"
+              placeholder="Search for products, brands and more..."
+              className="navbar-search-input"
+            />
+            <button className="navbar-search-btn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* Right Side Actions */}
@@ -156,17 +109,6 @@ function Navbar() {
               )}
             </div>
             <span className="cart-text">Cart</span>
-          </Link>
-
-          {/* Wishlist Icon with Badge */}
-          <Link to="/wishlist" className="wishlist-link" onClick={handleLinkClick}>
-            <div className="wishlist-icon-wrapper">
-              <FaHeart size={22} />
-              {wishlistCount > 0 && (
-                <span className="wishlist-badge">{wishlistCount}</span>
-              )}
-            </div>
-            <span className="wishlist-text">Wishlist</span>
           </Link>
 
           {/* Profile Dropdown */}
@@ -205,6 +147,22 @@ function Navbar() {
                   <FaUserEdit size={16} />
                   <span>Edit Profile</span>
                 </button>
+                <button
+                  className="dropdown-item"
+                  onClick={() => handleProfileNavigation('/wishlist')}
+                >
+                  <FaHeart size={16} />
+                  <span>My Wishlist</span>
+                </button>
+                {user?.role === 'admin' && (
+                  <button
+                    className="dropdown-item"
+                    onClick={() => handleProfileNavigation('/admin')}
+                  >
+                    <span>⚙️</span>
+                    <span>Admin Dashboard</span>
+                  </button>
+                )}
                 <div className="dropdown-divider"></div>
                 <button
                   className="dropdown-item logout-item"
@@ -218,14 +176,6 @@ function Navbar() {
           </div>
         </div>
       </div>
-
-      {/* Mobile Menu Overlay */}
-      {isMobileMenuOpen && (
-        <div
-          className="mobile-menu-overlay"
-          onClick={() => setIsMobileMenuOpen(false)}
-        ></div>
-      )}
     </nav>
   );
 }
