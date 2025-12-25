@@ -163,6 +163,31 @@ export const WishlistProvider = ({ children }) => {
     };
 
     /**
+     * Toggle wishlist - Add if not present, Remove if present
+     */
+    const toggleWishlist = async (product) => {
+        const productInWishlist = isInWishlist(product.id);
+
+        if (productInWishlist) {
+            // Remove from wishlist
+            const result = await removeFromWishlist(product.id);
+            return {
+                ...result,
+                action: 'removed',
+                message: result.success ? 'Removed from wishlist' : result.message
+            };
+        } else {
+            // Add to wishlist
+            const result = await addToWishlist(product);
+            return {
+                ...result,
+                action: 'added',
+                message: result.success ? 'Added to wishlist' : result.message
+            };
+        }
+    };
+
+    /**
      * Get wishlist count
      */
     const getWishlistCount = () => {
@@ -176,6 +201,7 @@ export const WishlistProvider = ({ children }) => {
                 wishlistCount,
                 addToWishlist,
                 removeFromWishlist,
+                toggleWishlist,
                 moveToCart,
                 clearWishlist,
                 isInWishlist,

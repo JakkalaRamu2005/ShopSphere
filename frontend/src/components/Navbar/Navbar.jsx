@@ -17,22 +17,73 @@ function Navbar() {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const profileDropdownRef = useRef(null);
 
+  // Search states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const searchRef = useRef(null);
+  const searchTimeoutRef = useRef(null);
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
         setIsProfileDropdownOpen(false);
       }
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSuggestions(false);
+      }
     };
 
-    if (isProfileDropdownOpen) {
+    if (isProfileDropdownOpen || showSuggestions) {
       document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isProfileDropdownOpen]);
+  }, [isProfileDropdownOpen, showSuggestions]);
+
+  // Debounced search
+  useEffect(() => {
+    if (searchQuery.trim().length > 0) {
+      setIsSearching(true);
+
+      // Clear previous timeout
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+
+      // Set new timeout for debouncing
+      searchTimeoutRef.current = setTimeout(async () => {
+        try {
+          const response = await fetch(`${API_URL}/products?search=${encodeURIComponent(searchQuery)}`, {
+            credentials: "include",
+          });
+          const data = await response.json();
+          setSearchResults(data.slice(0, 8)); // Limit to 8 suggestions
+          setShowSuggestions(true);
+        } catch (error) {
+          console.error("Search error:", error);
+          setSearchResults([]);
+        } finally {
+          setIsSearching(false);
+        }
+      }, 300); // 300ms debounce delay
+    } else {
+      setSearchResults([]);
+      setShowSuggestions(false);
+      setIsSearching(false);
+    }
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [searchQuery]);
 
   // Early return AFTER all hooks
   if (!isLoggedIn) return null;
@@ -47,6 +98,57 @@ function Navbar() {
       navigate("/login");
     } catch (error) {
       console.error("Logout error:", error);
+    }
+  };
+
+  // Search handlers
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+    setSelectedIndex(-1);
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      setShowSuggestions(false);
+      navigate(`/products?search=${encodeURIComponent(searchQuery)}`);
+    }
+  };
+
+  const handleProductClick = (productId) => {
+    setSearchQuery("");
+    setShowSuggestions(false);
+    navigate(`/products/${productId}`);
+  };
+
+  const handleKeyDown = (e) => {
+    if (!showSuggestions || searchResults.length === 0) return;
+
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        setSelectedIndex((prev) =>
+          prev < searchResults.length - 1 ? prev + 1 : prev
+        );
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1));
+        break;
+      case "Enter":
+        e.preventDefault();
+        if (selectedIndex >= 0 && selectedIndex < searchResults.length) {
+          handleProductClick(searchResults[selectedIndex].id);
+        } else {
+          handleSearchSubmit(e);
+        }
+        break;
+      case "Escape":
+        setShowSuggestions(false);
+        setSelectedIndex(-1);
+        break;
+      default:
+        break;
     }
   };
 
@@ -81,21 +183,71 @@ function Navbar() {
           <span className="brand-text">ShopEase</span>
         </Link>
 
-        {/* Integrated Search Bar */}
-        <div className="navbar-search-container">
-          <div className="navbar-search-wrapper">
+        {/* Integrated Search Bar with Autocomplete */}
+        <div className="navbar-search-container" ref={searchRef}>
+          <form onSubmit={handleSearchSubmit} className="navbar-search-wrapper">
             <input
               type="text"
               placeholder="Search for products, brands and more..."
               className="navbar-search-input"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              onKeyDown={handleKeyDown}
+              onFocus={() => searchQuery && setShowSuggestions(true)}
+              autoComplete="off"
             />
-            <button className="navbar-search-btn">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="11" cy="11" r="8"></circle>
-                <path d="m21 21-4.35-4.35"></path>
-              </svg>
+            <button type="submit" className="navbar-search-btn">
+              {isSearching ? (
+                <div className="search-spinner"></div>
+              ) : (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.35-4.35"></path>
+                </svg>
+              )}
             </button>
-          </div>
+          </form>
+
+          {/* Search Suggestions Dropdown */}
+          {showSuggestions && searchResults.length > 0 && (
+            <div className="search-suggestions">
+              {searchResults.map((product, index) => (
+                <div
+                  key={product.id}
+                  className={`search-suggestion-item ${index === selectedIndex ? 'selected' : ''}`}
+                  onClick={() => handleProductClick(product.id)}
+                  onMouseEnter={() => setSelectedIndex(index)}
+                >
+                  <img
+                    src={product.image_url || '/placeholder-product.png'}
+                    alt={product.name}
+                    className="suggestion-image"
+                  />
+                  <div className="suggestion-details">
+                    <div className="suggestion-name">{product.name}</div>
+                    <div className="suggestion-price">₹{product.price}</div>
+                  </div>
+                </div>
+              ))}
+              {searchQuery && (
+                <div
+                  className="search-suggestion-item view-all"
+                  onClick={handleSearchSubmit}
+                >
+                  <span>View all results for "{searchQuery}"</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* No Results Message */}
+          {showSuggestions && searchResults.length === 0 && !isSearching && searchQuery && (
+            <div className="search-suggestions">
+              <div className="search-no-results">
+                No products found for "{searchQuery}"
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Right Side Actions */}

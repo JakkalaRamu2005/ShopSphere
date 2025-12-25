@@ -1,0 +1,284 @@
+.footer {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  color: #e0e0e0;
+  padding: 60px 20px 20px;
+  margin-top: 80px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr 1fr 1.2fr;
+  gap: 40px;
+  margin-bottom: 40px;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Brand Section */
+.brand {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: #fff;
+}
+
+.tagline {
+  font-size: 15px;
+  margin: 0 0 25px 0;
+  color: #b0b0b0;
+}
+
+/* Newsletter */
+.newsletter {
+  margin-bottom: 25px;
+}
+
+.newsletterTitle {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  color: #fff;
+}
+
+.form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.input {
+  flex: 1;
+  padding: 12px 15px;
+  border: 1px solid #444;
+  border-radius: 6px;
+  background: #2a2a2a;
+  color: #fff;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #667eea;
+  background: #333;
+}
+
+.subscribeBtn {
+  padding: 12px 24px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.subscribeBtn:hover {
+  background: #5568d3;
+  transform: translateY(-2px);
+}
+
+.success {
+  color: #4ade80;
+  font-size: 13px;
+  margin: 5px 0 0 0;
+}
+
+/* Trust Badges */
+.trustBadges {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 15px;
+}
+
+.trustBadges img {
+  height: 32px;
+  width: auto;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
+}
+
+.trustBadges img:hover {
+  opacity: 1;
+}
+
+/* Headings */
+.heading {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 20px 0;
+  color: #fff;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.heading::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40px;
+  height: 2px;
+  background: #667eea;
+}
+
+/* Lists */
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.list li {
+  margin-bottom: 12px;
+}
+
+.list a {
+  color: #b0b0b0;
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  display: inline-block;
+}
+
+.list a:hover {
+  color: #fff;
+  transform: translateX(5px);
+}
+
+/* Contact Info */
+.contactInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.contactInfo p {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  font-size: 14px;
+  color: #b0b0b0;
+}
+
+.contactInfo a {
+  color: #b0b0b0;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.contactInfo a:hover {
+  color: #fff;
+}
+
+.icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.hours {
+  font-size: 13px;
+  color: #888;
+}
+
+/* Social Links */
+.socialLinks {
+  margin-top: 20px;
+}
+
+.social {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.socialIcon {
+  font-size: 28px;
+  transition: transform 0.3s ease;
+  display: inline-block;
+}
+
+.social a:hover .socialIcon {
+  transform: scale(1.2);
+}
+
+/* Bottom Bar */
+.bottom {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-top: 30px;
+  border-top: 1px solid #444;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.bottom p {
+  margin: 0;
+  font-size: 14px;
+  color: #888;
+}
+
+.bottomLinks {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  font-size: 13px;
+}
+
+.bottomLinks a {
+  color: #b0b0b0;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.bottomLinks a:hover {
+  color: #fff;
+}
+
+.bottomLinks span {
+  color: #666;
+}
+
+/* Mobile Responsive */
+@media (max-width: 1024px) {
+  .container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .footer {
+    padding: 40px 15px 15px;
+  }
+
+  .container {
+    grid-template-columns: 1fr;
+    gap: 35px;
+  }
+
+  .form {
+    flex-direction: column;
+  }
+
+  .subscribeBtn {
+    width: 100%;
+  }
+
+  .bottom {
+    flex-direction: column;
+    text-align: center;
+  }
+}

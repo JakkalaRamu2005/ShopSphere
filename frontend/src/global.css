@@ -85,6 +85,13 @@
   font-family: var(--font-primary);
 }
 
+/* Body padding for fixed navbar */
+body {
+  padding-top: 80px;
+  /* Adjust based on navbar height */
+  margin: 0;
+}
+
 /* Button Styles - Enhanced */
 .btn {
   padding: 0.8rem 1.5rem;

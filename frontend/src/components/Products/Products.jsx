@@ -14,7 +14,7 @@ function Products() {
   const [productsPerpage] = useState(8);
   const navigate = useNavigate();
   const { addToCart } = useCart();
-  const { addToWishlist, isInWishlist } = useWishlist();
+  const { toggleWishlist, isInWishlist } = useWishlist();
 
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [priceRange, setPriceRange] = useState({ min: 0, max: 1000 });
@@ -35,6 +35,9 @@ function Products() {
     "Accessories"
   ]);
   const [showVoiceSearch, setShowVoiceSearch] = useState(false);
+
+  // Notification state
+  const [notification, setNotification] = useState({ show: false, message: '', type: '' });
 
   useEffect(() => {
     const fetchAllProducts = async () => {
@@ -216,11 +219,31 @@ function Products() {
 
   const handleAddToWishlist = async (e, product) => {
     e.stopPropagation();
-    const result = await addToWishlist(product);
+    const result = await toggleWishlist(product);
+
     if (result.success) {
-      alert('Successfully added to wishlist!');
+      // Show notification
+      setNotification({
+        show: true,
+        message: result.message,
+        type: result.action === 'added' ? 'success' : 'info'
+      });
+
+      // Auto-hide notification after 3 seconds
+      setTimeout(() => {
+        setNotification({ show: false, message: '', type: '' });
+      }, 3000);
     } else {
-      alert(result.message || 'Failed to add to wishlist');
+      // Show error notification
+      setNotification({
+        show: true,
+        message: result.message || 'Failed to update wishlist',
+        type: 'error'
+      });
+
+      setTimeout(() => {
+        setNotification({ show: false, message: '', type: '' });
+      }, 3000);
     }
   };
 
@@ -346,6 +369,14 @@ function Products() {
 
   return (
     <div className="products-page">
+      {/* Notification Toast */}
+      {notification.show && (
+        <div className={`notification-toast ${notification.type}`}>
+          <span>{notification.message}</span>
+          <button onClick={() => setNotification({ show: false, message: '', type: '' })}>✕</button>
+        </div>
+      )}
+
       {/* Page Header */}
       <div className="products-header">
         <h1 className="products-heading">All Products</h1>

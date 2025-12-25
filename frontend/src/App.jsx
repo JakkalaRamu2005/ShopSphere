@@ -24,6 +24,23 @@ import AdminUsers from "./components/Admin/AdminUsers";
 import Payment from "./components/Payment/Payment";
 import PaymentSuccess from "./components/Payment/PaymentSuccess";
 import PaymentFailure from "./components/Payment/PaymentFailure";
+import Carousel from "./components/Carousel/Carousel";
+
+// Footer-related components
+
+import Footer from "./components/allfootercode/Footer/Footer";
+import ShippingInfo from "./components/allfootercode/ShippingInfo/ShippingInfo";
+import ReturnsRefunds from "./components/allfootercode/ReturnsRefunds/ReturnsRefunds";
+import TrackOrder from "./components/allfootercode/TrackOrder/TrackOrder";
+import SizeGuide from "./components/allfootercode/SizeGuide/SizeGuide";
+import FAQ from "./components/allfootercode/FAQ/FAQ";
+import ContactUs from "./components/allfootercode/ContactUs/ContactUs";
+import AboutUs from "./components/allfootercode/AboutUs/AboutUs";
+import Careers from "./components/allfootercode/Careers/Careers";
+import Blog from "./components/allfootercode/Blog/Blog";
+import PrivacyPolicy from "./components/allfootercode/PrivacyPolicy/PrivacyPolicy";
+import TermsConditions from "./components/allfootercode/TermsConditions/TermsConditions";
+import Sitemap from "./components/allfootercode/Sitemap/Sitemap";
 
 
 
@@ -42,24 +59,51 @@ function App() {
               <Route path="/register" element={<Register />} />
 
               <Route element={<ProtectedRoute />}>
-                <Route path="/" element={<Home />} />
+                {/* Home Route with Footer */}
+                <Route
+                  path="/"
+                  element={
+                    <>
+                      <Home />
+                      <Footer />
+                    </>
+                  }
+                />
 
-                <Route path="/cart" element={<Cart />}></Route>
-                <Route path="/wishlist" element={<Wishlist />}></Route>
-                <Route path="products" element={<Products />}></Route>
-                <Route path="/about" element={<About />}></Route>
-                <Route path="/products/:id" element={<ProductDetails />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/orders" element={<OrderHistory />} />
-                <Route path="/orders/:orderId" element={<OrderDetails />} />
-                <Route path="/profile" element={<UserProfile />} />
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/admin/products" element={<AdminProducts />} />
-                <Route path="/admin/orders" element={<AdminOrders />} />
-                <Route path="/admin/users" element={<AdminUsers />} />
-                <Route path="/payment" element={<Payment />} />
-                <Route path="/payment/success" element={<PaymentSuccess />} />
-                <Route path="/payment/failure" element={<PaymentFailure />} />
+                <Route path="/cart" element={<><Cart /><Footer /></>}></Route>
+                <Route path="/wishlist" element={<><Wishlist /><Footer /></>}></Route>
+                <Route path="products" element={<><Products /><Footer /></>}></Route>
+                <Route path="/about" element={<><About /><Footer /></>}></Route>
+                <Route path="/products/:id" element={<><ProductDetails /><Footer /></>} />
+                <Route path="/checkout" element={<><Checkout /><Footer /></>} />
+                <Route path="/orders" element={<><OrderHistory /><Footer /></>} />
+                <Route path="/orders/:orderId" element={<><OrderDetails /><Footer /></>} />
+                <Route path="/profile" element={<><UserProfile /><Footer /></>} />
+                <Route path="/admin" element={<><AdminDashboard /><Footer /></>} />
+                <Route path="/admin/products" element={<><AdminProducts /><Footer /></>} />
+                <Route path="/admin/orders" element={<><AdminOrders /><Footer /></>} />
+                <Route path="/admin/users" element={<><AdminUsers /><Footer /></>} />
+                <Route path="/payment" element={<><Payment /><Footer /></>} />
+                <Route path="/payment/success" element={<><PaymentSuccess /><Footer /></>} />
+                <Route path="/payment/failure" element={<><PaymentFailure /><Footer /></>} />
+
+                {/* Footer Pages Routes */}
+                <Route path="/shipping" element={<><ShippingInfo /><Footer /></>} />
+                <Route path="/returns" element={<><ReturnsRefunds /><Footer /></>} />
+                <Route path="/track-order" element={<><TrackOrder /><Footer /></>} />
+                <Route path="/size-guide" element={<><SizeGuide /><Footer /></>} />
+
+                {/* FAQ and Contact Routes */}
+                <Route path="/faq" element={<><FAQ /><Footer /></>} />
+                <Route path="/contact" element={<><ContactUs /><Footer /></>} />
+                <Route path="/about-us" element={<><AboutUs /><Footer /></>} />
+                <Route path="/careers" element={<><Careers /><Footer /></>} />
+                <Route path="/blog" element={<><Blog /><Footer /></>} />
+
+                {/* Legal Pages */}
+                <Route path="/privacy" element={<><PrivacyPolicy /><Footer /></>} />
+                <Route path="/terms" element={<><TermsConditions /><Footer /></>} />
+                <Route path="/sitemap" element={<><Sitemap /><Footer /></>} />
               </Route>
 
 
