@@ -25,6 +25,7 @@ import Payment from "./components/Payment/Payment";
 import PaymentSuccess from "./components/Payment/PaymentSuccess";
 import PaymentFailure from "./components/Payment/PaymentFailure";
 import Carousel from "./components/Carousel/Carousel";
+import Chatbot from "./components/Chatbot/Chatbot";
 
 // Footer-related components
 
@@ -109,6 +110,7 @@ function App() {
 
               <Route path="*" element={<NotFound />}></Route>
             </Routes>
+            <Chatbot />
           </BrowserRouter>
         </WishlistProvider>
       </CartProvider>

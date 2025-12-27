@@ -13,6 +13,7 @@ const adminRoutes = require("./routes/admin");
 const paymentRoutes = require("./routes/payment");
 const addressRoutes = require("./routes/address");
 const couponRoutes = require("./routes/coupon");
+const chatbotRoutes = require("./routes/chatbot");
 const app = express();
 app.use(cookieParser());
 app.use(
@@ -51,6 +52,7 @@ app.use("/admin", adminRoutes);
 app.use("/payment", paymentRoutes);
 app.use("/address", addressRoutes);
 app.use("/coupon", couponRoutes);
+app.use("/chatbot", chatbotRoutes);
 
 
 const PORT = process.env.PORT || 8080;
