@@ -1,0 +1,74 @@
+/* Admin Users Page */
+.users-table-container {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    overflow-x: auto;
+}
+
+.role-badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.role-badge.admin {
+    background: rgba(139, 92, 246, 0.1);
+    color: #8b5cf6;
+}
+
+.role-badge.user {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+.status-badge.active {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.status-badge.blocked {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.block-btn,
+.unblock-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.block-btn {
+    background: #ef4444;
+    color: white;
+}
+
+.block-btn:hover {
+    background: #dc2626;
+}
+
+.unblock-btn {
+    background: #10b981;
+    color: white;
+}
+
+.unblock-btn:hover {
+    background: #059669;
+}
+
+.self-label,
+.admin-label {
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+}

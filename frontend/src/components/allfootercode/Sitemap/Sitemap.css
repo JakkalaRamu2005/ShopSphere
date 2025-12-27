@@ -1,0 +1,87 @@
+.sitemap-page {
+  min-height: 100vh;
+  background: #f9fafb;
+}
+
+.sitemap-hero {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.sitemap-hero h1 {
+  font-size: 42px;
+  margin: 0 0 15px 0;
+  font-weight: 700;
+}
+
+.sitemap-hero p {
+  font-size: 18px;
+  margin: 0;
+  opacity: 0.95;
+}
+
+.sitemap-container {
+  max-width: 1200px;
+  margin: -40px auto 80px;
+  padding: 0 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 25px;
+}
+
+.sitemap-section {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.sitemap-section h2 {
+  font-size: 22px;
+  margin: 0 0 20px 0;
+  color: #1f2937;
+  border-bottom: 3px solid #667eea;
+  padding-bottom: 10px;
+}
+
+.sitemap-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sitemap-links li {
+  margin-bottom: 12px;
+}
+
+.sitemap-links a {
+  color: #4b5563;
+  text-decoration: none;
+  font-size: 16px;
+  display: block;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.sitemap-links a:hover {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  transform: translateX(5px);
+}
+
+@media (max-width: 768px) {
+  .sitemap-hero h1 {
+    font-size: 32px;
+  }
+
+  .sitemap-container {
+    grid-template-columns: 1fr;
+  }
+
+  .sitemap-section {
+    padding: 25px 20px;
+  }
+}

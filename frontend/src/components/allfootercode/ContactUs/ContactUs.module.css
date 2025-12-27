@@ -1,0 +1,257 @@
+.contactPage {
+  min-height: 100vh;
+  background: #f9fafb;
+}
+
+.hero {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.hero h1 {
+  font-size: 42px;
+  margin: 0 0 15px 0;
+  font-weight: 700;
+}
+
+.hero p {
+  font-size: 18px;
+  margin: 0;
+  opacity: 0.95;
+}
+
+.container {
+  max-width: 1200px;
+  margin: -40px auto 80px;
+  padding: 0 20px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 40px;
+}
+
+/* Form Section */
+.formSection {
+  background: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.formSection h2 {
+  font-size: 28px;
+  margin: 0 0 10px 0;
+  color: #1f2937;
+}
+
+.subtitle {
+  color: #6b7280;
+  margin: 0 0 30px 0;
+}
+
+.successMessage {
+  background: #d1fae5;
+  color: #065f46;
+  padding: 15px 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.formGroup label {
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.formGroup input,
+.formGroup select,
+.formGroup textarea {
+  padding: 12px 15px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.formGroup input:focus,
+.formGroup select:focus,
+.formGroup textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.formGroup textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.submitBtn {
+  padding: 15px 35px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.submitBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+/* Info Section */
+.infoSection {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.infoCard {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+}
+
+.infoCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.iconBox {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin-bottom: 15px;
+}
+
+.infoCard h3 {
+  font-size: 18px;
+  margin: 0 0 10px 0;
+  color: #1f2937;
+}
+
+.infoCard p {
+  margin: 5px 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.infoCard a {
+  color: #667eea;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.infoCard a:hover {
+  color: #764ba2;
+}
+
+.hours {
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+.chatBtn {
+  margin-top: 10px;
+  padding: 10px 20px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.chatBtn:hover {
+  background: #764ba2;
+}
+
+.socialCard {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 25px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.socialCard h3 {
+  font-size: 18px;
+  margin: 0 0 15px 0;
+}
+
+.socialIcons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.socialIcons a {
+  font-size: 28px;
+  transition: transform 0.3s ease;
+  display: inline-block;
+}
+
+.socialIcons a:hover {
+  transform: scale(1.2);
+}
+
+/* Mobile Responsive */
+@media (max-width: 968px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero h1 {
+    font-size: 32px;
+  }
+
+  .formSection {
+    padding: 25px;
+  }
+
+  .formSection h2 {
+    font-size: 24px;
+  }
+}
