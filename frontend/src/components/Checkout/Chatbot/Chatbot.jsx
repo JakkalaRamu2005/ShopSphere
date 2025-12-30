@@ -1,10 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './Chatbot.css';
-<<<<<<< HEAD
-import {API_BASE_URL} from "../../config/api";
-=======
-import API_URL from "../../config/api";
->>>>>>> master
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -49,7 +44,7 @@ export default function Chatbot() {
         content: msg.content
       }));
 
-      const response = await fetch(API_URL + '/chatbot/message', {
+      const response = await fetch('http://localhost:8080/chatbot/message', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

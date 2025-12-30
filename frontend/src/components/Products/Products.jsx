@@ -4,7 +4,11 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "../CartContext";
 import { useWishlist } from "../WishlistContext";
 import ProductRatingBadge from "./ProductRatingBadge";
+<<<<<<< HEAD
 import { API_BASE_URL } from "../../config/api";
+=======
+import API_BASE_URL from "../../config/api";
+>>>>>>> master
 
 function Products() {
   const [products, setProducts] = useState([]);
@@ -43,6 +47,7 @@ function Products() {
     const fetchAllProducts = async () => {
       setLoading(true);
       try {
+<<<<<<< HEAD
         // Fetch all products from backend (includes both FakeStore and admin products)
         const response = await fetch(`${API_BASE_URL}/products`);
         const data = await response.json();
@@ -90,6 +95,42 @@ function Products() {
 
         // Calculate price range
         const prices = formattedProducts.map(product => product.price * 83);
+=======
+        // Fetch FakeStore API products
+        const fakeStoreResponse = await fetch("https://fakestoreapi.com/products");
+        const fakeStoreData = await fakeStoreResponse.json();
+
+        // Fetch custom admin products
+        const customResponse = await fetch(`${API_BASE_URL}/admin/products`);
+        const customData = await customResponse.json();
+
+        // Merge both product lists
+        let allProducts = [...fakeStoreData];
+
+        if (customData.success && customData.products.length > 0) {
+          // Convert custom products to match FakeStore format
+          const formattedCustomProducts = customData.products.map(p => ({
+            id: `custom-${p.id}`, // Prefix to distinguish from FakeStore
+            title: p.title,
+            price: parseFloat(p.price) / 83, // Convert back to USD for consistency
+            description: p.description,
+            category: p.category || 'custom',
+            image: p.image || 'https://via.placeholder.com/200',
+            rating: { rate: 0, count: 0 }
+          }));
+
+          allProducts = [...allProducts, ...formattedCustomProducts];
+        }
+
+        setProducts(allProducts);
+
+        // Extract unique categories
+        const uniqueCategories = [...new Set(allProducts.map(product => product.category))];
+        setCategories(uniqueCategories);
+
+        // Calculate price range
+        const prices = allProducts.map(product => product.price * 83);
+>>>>>>> master
         const minPrice = Math.floor(Math.min(...prices));
         const maxPrice = Math.ceil(Math.max(...prices));
         setPriceRange({ min: minPrice, max: maxPrice });
@@ -907,7 +948,10 @@ function Products() {
           <h2 className="recently-viewed-title">Recently Viewed</h2>
           <div className="recently-viewed-grid">
             {recentlyViewed.map((product) => (
+<<<<<<< HEAD
               // console.log(product.image);
+=======
+>>>>>>> master
               <div
                 key={product.id}
                 className="recently-viewed-card"

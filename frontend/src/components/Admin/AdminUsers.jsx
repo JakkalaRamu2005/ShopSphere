@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
+<<<<<<< HEAD
 import {API_BASE_URL} from '../../config/api';
+=======
+import API_BASE_URL from '../../config/api';
+>>>>>>> master
 import './adminusers.css';
 
 function AdminUsers() {

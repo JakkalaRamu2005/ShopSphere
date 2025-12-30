@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
+<<<<<<< HEAD
 import { API_BASE_URL } from "../../config/api";
+=======
+import API_BASE_URL from '../../config/api';
+>>>>>>> master
 import './addressmanagement.css';
 
 function AddressManagement() {

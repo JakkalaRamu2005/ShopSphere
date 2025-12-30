@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+<<<<<<< HEAD
 import {API_BASE_URL} from "../../config/api";
+=======
+import { API_BASE_URL } from "../../config/api";
+>>>>>>> master
 import "./orderdetails.css";
 
 /**

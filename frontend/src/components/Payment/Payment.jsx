@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
+<<<<<<< HEAD
 import {API_BASE_URL} from '../../config/api';
+=======
+import API_BASE_URL from '../../config/api';
+>>>>>>> master
 import './payment.css';
 
 function Payment() {
