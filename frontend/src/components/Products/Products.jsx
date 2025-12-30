@@ -43,40 +43,53 @@ function Products() {
     const fetchAllProducts = async () => {
       setLoading(true);
       try {
-        // Fetch FakeStore API products
-        const fakeStoreResponse = await fetch("https://fakestoreapi.com/products");
-        const fakeStoreData = await fakeStoreResponse.json();
+        // Fetch all products from backend (includes both FakeStore and admin products)
+        const response = await fetch(`${API_BASE_URL}/products`);
+        const data = await response.json();
 
-        // Fetch custom admin products
-        const customResponse = await fetch(`${API_BASE_URL}/admin/products`);
-        const customData = await customResponse.json();
-
-        // Merge both product lists
-        let allProducts = [...fakeStoreData];
-
-        if (customData.success && customData.products.length > 0) {
-          // Convert custom products to match FakeStore format
-          const formattedCustomProducts = customData.products.map(p => ({
-            id: `custom-${p.id}`, // Prefix to distinguish from FakeStore
+        if (data.success && data.products) {
+          // Format products to match expected structure
+          const formattedProducts = data.products.map(p => ({
+            id: p.id,
             title: p.title,
-            price: parseFloat(p.price) / 83, // Convert back to USD for consistency
+            price: parseFloat(p.price) / 83, // Convert INR to USD for consistency
             description: p.description,
-            category: p.category || 'custom',
-            image: p.image || 'https://via.placeholder.com/200',
-            rating: { rate: 0, count: 0 }
+            category: p.category,
+            image: p.image,
+            rating: {
+              rate: parseFloat(p.rating_rate) || 0,
+              count: parseInt(p.rating_count) || 0
+            },
+            stock: p.stock || 0,
+            source: p.source || 'fakestore'
           }));
 
-          allProducts = [...allProducts, ...formattedCustomProducts];
+          setProducts(formattedProducts);
+        } else {
+          setProducts([]);
         }
 
-        setProducts(allProducts);
+        // Extract unique categories from formatted products
+        const formattedProducts = data.products.map(p => ({
+          id: p.id,
+          title: p.title,
+          price: parseFloat(p.price) / 83,
+          description: p.description,
+          category: p.category,
+          image: p.image,
+          rating: {
+            rate: parseFloat(p.rating_rate) || 0,
+            count: parseInt(p.rating_count) || 0
+          },
+          stock: p.stock || 0,
+          source: p.source || 'fakestore'
+        }));
 
-        // Extract unique categories
-        const uniqueCategories = [...new Set(allProducts.map(product => product.category))];
+        const uniqueCategories = [...new Set(formattedProducts.map(product => product.category))];
         setCategories(uniqueCategories);
 
         // Calculate price range
-        const prices = allProducts.map(product => product.price * 83);
+        const prices = formattedProducts.map(product => product.price * 83);
         const minPrice = Math.floor(Math.min(...prices));
         const maxPrice = Math.ceil(Math.max(...prices));
         setPriceRange({ min: minPrice, max: maxPrice });

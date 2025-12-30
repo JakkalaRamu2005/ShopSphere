@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import "./productdetails.css";
 import { useCart } from "../CartContext";
 import ProductReviews from "../Reviews/ProductReviews";
+import API_BASE_URL from "../../config/api";
 
 function ProductDetails() {
   const { id } = useParams();
@@ -13,10 +14,25 @@ function ProductDetails() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`https://fakestoreapi.com/products/${id}`)
+    fetch(`${API_BASE_URL}/products/${id}`)
       .then((res) => res.json())
       .then((data) => {
-        setProduct(data);
+        if (data.success && data.product) {
+          // Format product to match expected structure
+          const formattedProduct = {
+            id: data.product.id,
+            title: data.product.title,
+            price: parseFloat(data.product.price) / 83, // Convert INR to USD
+            description: data.product.description,
+            category: data.product.category,
+            image: data.product.image,
+            rating: {
+              rate: parseFloat(data.product.rating_rate) || 0,
+              count: parseInt(data.product.rating_count) || 0
+            }
+          };
+          setProduct(formattedProduct);
+        }
         setLoading(false);
       })
       .catch((err) => {

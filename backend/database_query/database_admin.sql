@@ -20,8 +20,9 @@ ALTER TABLE users ADD INDEX idx_role (role);
 ALTER TABLE users ADD INDEX idx_status (status);
 
 -- ============================================
--- 2. PRODUCTS TABLE (Custom Products)
+-- 2. PRODUCTS TABLE (Unified for Admin + FakeStore API)
 -- ============================================
+-- This table stores both admin-added products and FakeStore API products
 CREATE TABLE IF NOT EXISTS products (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(500) NOT NULL,
@@ -30,12 +31,18 @@ CREATE TABLE IF NOT EXISTS products (
     category VARCHAR(255),
     image TEXT,
     stock INT DEFAULT 0,
-    created_by INT,
+    rating_rate DECIMAL(3, 2) DEFAULT NULL,
+    rating_count INT DEFAULT NULL,
+    source ENUM('admin', 'fakestore') DEFAULT 'admin',
+    external_id INT DEFAULT NULL,
+    created_by INT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
     INDEX idx_category (category),
-    INDEX idx_created_by (created_by)
+    INDEX idx_created_by (created_by),
+    INDEX idx_source (source),
+    INDEX idx_external_id (external_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================

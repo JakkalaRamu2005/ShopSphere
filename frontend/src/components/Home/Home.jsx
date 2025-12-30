@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "../CartContext";
 import Carousel from "../Carousel/Carousel";
 import "./home.css";
+import API_BASE_URL from "../../config/api";
 
 function Home() {
   const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -10,12 +11,27 @@ function Home() {
   const navigate = useNavigate();
   const { addToCart } = useCart();
 
-  // Fetch featured products (first 4 products)
+  // Fetch featured products (high-rated products)
   useEffect(() => {
-    fetch("https://fakestoreapi.com/products?limit=4")
+    fetch(`${API_BASE_URL}/products/featured?limit=4`)
       .then((res) => res.json())
       .then((data) => {
-        setFeaturedProducts(data);
+        if (data.success && data.products) {
+          // Format products to match expected structure
+          const formattedProducts = data.products.map(p => ({
+            id: p.id,
+            title: p.title,
+            price: parseFloat(p.price) / 83, // Convert INR to USD
+            description: p.description,
+            category: p.category,
+            image: p.image,
+            rating: {
+              rate: parseFloat(p.rating_rate) || 0,
+              count: parseInt(p.rating_count) || 0
+            }
+          }));
+          setFeaturedProducts(formattedProducts);
+        }
         setLoading(false);
       })
       .catch((err) => {
@@ -80,12 +96,14 @@ function Home() {
         <h2 className="section-title">Shop by Category</h2>
         <div className="categories-grid">
           {categories.map((category, index) => (
+
             <div
               key={index}
               className="category-card"
               onClick={() => handleCategoryClick(category.name.toLowerCase())}
             >
               <div className="category-image-wrapper">
+
                 <img
                   src={category.image}
                   alt={category.name}
@@ -109,6 +127,7 @@ function Home() {
         ) : (
           <div className="featured-grid">
             {featuredProducts.map((product) => (
+              console.log(product.image),
               <div
                 key={product.id}
                 className="featured-card"
@@ -119,10 +138,11 @@ function Home() {
                     src={product.image}
                     alt={product.title}
                     onError={(e) => {
-                      e.target.src = 'https://via.placeholder.com/200?text=Product';
+                      e.target.src = "https://placehold.co/200x200?text=No+Image";
                     }}
                   />
                 </div>
+
                 <h3 className="featured-title" title={product.title}>
                   {product.title}
                 </h3>
