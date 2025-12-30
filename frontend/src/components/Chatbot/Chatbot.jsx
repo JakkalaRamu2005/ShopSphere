@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './Chatbot.css';
-import API_URL from "../../config/api";
+import {API_BASE_URL} from "../../config/api";
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);

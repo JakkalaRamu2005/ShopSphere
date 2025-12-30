@@ -3,7 +3,7 @@ import { useAuth } from '../AuthContext';
 import ReviewForm from './ReviewForm';
 import ReviewList from './ReviewList';
 import './productreviews.css';
-import API_BASE_URL from '../../config/api';
+import { API_BASE_URL } from '../../config/api';
 
 function ProductReviews({ productId }) {
     const { user } = useAuth();

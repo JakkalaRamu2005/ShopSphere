@@ -3,7 +3,7 @@ import { FaShoppingCart, FaBars, FaTimes, FaUser, FaBox, FaUserEdit, FaSignOutAl
 import { useAuth } from "../AuthContext";
 import { useCart } from "../CartContext";
 import { useWishlist } from "../WishlistContext";
-import API_URL from "../../config/api";
+import {API_BASE_URL} from "../../config/api";
 import { useState, useRef, useEffect } from "react";
 import "./navbar.css";
 

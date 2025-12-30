@@ -23,21 +23,29 @@ app.use(
 
 // CORS Configuration for Development
 // CORS Configuration (Development only)
+const FRONTEND_URL = process.env.FRONTEND_URL;
+
 const corsOptions = {
-    origin: function (origin, callback) {
-        // Allow requests with no origin (Postman, curl, mobile apps)
-        if (!origin) return callback(null, true);
+  origin: function (origin, callback) {
+    // allow any tools like Postman / curl
+    if (!origin) return callback(null, true);
 
-        // Allow localhost (development)
-        if (origin.startsWith('http://localhost:')) {
-            return callback(null, true);
-        }
+    // allow your frontend link
+    if (origin === FRONTEND_URL) {
+      return callback(null, true);
+    }
 
-        callback(new Error('Not allowed by CORS'));
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    // allow localhost for development
+    if (origin.startsWith("http://localhost:")) {
+      return callback(null, true);
+    }
+
+    // block anything else
+    callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 };
 
 

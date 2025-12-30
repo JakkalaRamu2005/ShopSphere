@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
-import API_BASE_URL from '../../config/api';
+import {API_BASE_URL} from '../../config/api';
 import './payment.css';
 
 function Payment() {

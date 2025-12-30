@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import StarRating from './StarRating';
 import './reviewform.css';
-import API_BASE_URL from '../../config/api';
+import { API_BASE_URL } from '../../config/api';
 
 function ReviewForm({ productId, onReviewSubmitted, existingReview = null }) {
     const [rating, setRating] = useState(existingReview?.rating || 0);

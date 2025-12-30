@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useCart } from "../CartContext";
 import { useNavigate } from "react-router-dom";
-import API_URL from "../../config/api";
+import {API_BASE_URL} from "../../config/api";
 import "./checkout.css";
 
 function Checkout() {

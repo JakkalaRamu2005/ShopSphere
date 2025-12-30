@@ -1,6 +1,6 @@
 import { createContext, useState, useContext, useEffect } from "react";
 import { useAuth } from "./AuthContext";
-import API_URL from "../config/api";
+import { API_BASE_URL } from "../config/api";
 
 const CartContext = createContext();
 
@@ -21,7 +21,7 @@ export const CartProvider = ({ children }) => {
   const fetchCart = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/cart`, {
+      const response = await fetch(`${API_BASE_URL}/cart`, {
         method: "GET",
         credentials: "include",
       });
@@ -55,7 +55,7 @@ export const CartProvider = ({ children }) => {
 
     try {
 
-      const response = await fetch(`${API_URL}/cart/add`, {
+      const response = await fetch(`${API_BASE_URL}/cart/add`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -90,7 +90,7 @@ export const CartProvider = ({ children }) => {
     if (!isLoggedIn) return;
 
     try {
-      const response = await fetch(`${API_URL}/cart/remove/${productId}`, {
+      const response = await fetch(`${API_BASE_URL}/cart/remove/${productId}`, {
         method: "DELETE",
         credentials: "include",
       });
@@ -115,7 +115,7 @@ export const CartProvider = ({ children }) => {
 
     try {
 
-      const response = await fetch(`${API_URL}/cart/update`, {
+      const response = await fetch(`${API_BASE_URL}/cart/update`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -145,7 +145,7 @@ export const CartProvider = ({ children }) => {
     if (!isLoggedIn) return;
 
     try {
-      const response = await fetch(`${API_URL}/cart/clear`, {
+      const response = await fetch(`${API_BASE_URL}/cart/clear`, {
         method: "DELETE",
         credentials: "include",
       });

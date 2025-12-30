@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "../CartContext";
 import Carousel from "../Carousel/Carousel";
 import "./home.css";
-import API_BASE_URL from "../../config/api";
+import {API_BASE_URL} from "../../config/api";
 
 function Home() {
   const [featuredProducts, setFeaturedProducts] = useState([]);

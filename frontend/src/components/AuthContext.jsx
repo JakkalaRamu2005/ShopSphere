@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { createContext, useState, useContext } from "react";
-import API_URL from "../config/api";
+import { API_BASE_URL } from "../config/api";
 
 const AuthContext = createContext();
 
@@ -12,7 +12,7 @@ const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
 
     useEffect(() => {
-        fetch(`${API_URL}/auth/profile`, {
+        fetch(`${API_BASE_URL}/auth/profile`, {
             method: "GET",
             credentials: "include",
         })
@@ -38,7 +38,7 @@ const AuthProvider = ({ children }) => {
 
     const login = async (credentials) => {
         try {
-            const res = await fetch(`${API_URL}/auth/login`, {
+            const res = await fetch(`${API_BASE_URL}/auth/login`, {
                 method: "POST",
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(credentials),
@@ -51,7 +51,7 @@ const AuthProvider = ({ children }) => {
             if (res.ok) {
                 setIsLoggedIn(true);
                 // Fetch user profile after login
-                const profileRes = await fetch(`${API_URL}/auth/profile`, {
+                const profileRes = await fetch(`${API_BASE_URL}/auth/profile`, {
                     method: "GET",
                     credentials: "include",
                 });

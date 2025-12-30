@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import StarRating from './StarRating';
 import './reviewlist.css';
-import API_BASE_URL from '../../config/api';
+import { API_BASE_URL } from '../../config/api';
 
 function ReviewList({ productId }) {
     const [reviews, setReviews] = useState([]);

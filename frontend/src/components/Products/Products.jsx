@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "../CartContext";
 import { useWishlist } from "../WishlistContext";
 import ProductRatingBadge from "./ProductRatingBadge";
-import API_BASE_URL from "../../config/api";
+import { API_BASE_URL } from "../../config/api";
 
 function Products() {
   const [products, setProducts] = useState([]);
@@ -907,6 +907,7 @@ function Products() {
           <h2 className="recently-viewed-title">Recently Viewed</h2>
           <div className="recently-viewed-grid">
             {recentlyViewed.map((product) => (
+              // console.log(product.image);
               <div
                 key={product.id}
                 className="recently-viewed-card"

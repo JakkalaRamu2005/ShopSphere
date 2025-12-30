@@ -2,7 +2,7 @@ import { useState } from "react";
 import "./register.css";
 import { useNavigate, Link, Navigate } from "react-router";
 import { useAuth } from "../AuthContext";
-import API_URL from "../../config/api";
+import { API_BASE_URL } from "../../config/api";
 // import axios from "axios";
 function Register() {
   const [form, setForm] = useState({ name: "", email: "", password: "" });

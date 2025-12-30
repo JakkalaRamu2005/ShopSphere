@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import "./productdetails.css";
 import { useCart } from "../CartContext";
 import ProductReviews from "../Reviews/ProductReviews";
-import API_BASE_URL from "../../config/api";
+import { API_BASE_URL } from "../../config/api";
 
 function ProductDetails() {
   const { id } = useParams();
@@ -26,6 +26,7 @@ function ProductDetails() {
             description: data.product.description,
             category: data.product.category,
             image: data.product.image,
+            
             rating: {
               rate: parseFloat(data.product.rating_rate) || 0,
               count: parseInt(data.product.rating_count) || 0
@@ -72,9 +73,13 @@ function ProductDetails() {
   }
 
   return (
+    // console.log(product.image);
+    
     <div className="details-container">
+      
       {/* Image Section */}
       <div className="details-image-container">
+        
         <img src={product.image} alt={product.title} className="details-image" />
       </div>
 

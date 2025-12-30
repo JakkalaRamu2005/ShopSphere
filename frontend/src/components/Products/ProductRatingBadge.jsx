@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import StarRating from '../Reviews/StarRating';
 import './productratingbadge.css';
-import API_BASE_URL from '../../config/api';
+import {API_BASE_URL} from '../../config/api';
 
 function ProductRatingBadge({ productId }) {
     const [rating, setRating] = useState(0);
