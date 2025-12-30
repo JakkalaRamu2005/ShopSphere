@@ -21,26 +21,40 @@ app.use(
 )
 
 // CORS Configuration for Development
-// CORS Configuration (Development only)
+// ---- CORS SETUP ---- //
+const FRONTEND_URL = process.env.FRONTEND_URL; // your live frontend
+const EXTRA_FRONTEND_URL = process.env.EXTRA_FRONTEND_URL; // optional extra
+
+const allowedOrigins = [
+  FRONTEND_URL,
+  EXTRA_FRONTEND_URL,
+  "http://localhost:3000",
+  "http://localhost:5173",
+].filter(Boolean); // remove empty values
+
 const corsOptions = {
-    origin: function (origin, callback) {
-        // Allow requests with no origin (Postman, curl, mobile apps)
-        if (!origin) return callback(null, true);
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true); // Postman / same origin
 
-        // Allow localhost (development)
-        if (origin.startsWith('http://localhost:')) {
-            return callback(null, true);
-        }
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
 
-        callback(new Error('Not allowed by CORS'));
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    return callback(new Error(`❌ Not allowed by CORS: ${origin}`));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  optionsSuccessStatus: 200,
 };
 
-
+// Apply CORS to all routes
 app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
+
+
+
+app.use(express.urlencoded({ extended: true }));
 // app.use(bodyParser.json());
 app.use('/auth', authRoutes);
 app.use('/cart', cartRoutes);
@@ -60,78 +74,3 @@ app.listen(PORT, () => {
     console.log(`Server is running at http://localhost:${PORT}/`)
 })
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// const express = require('express');
-// const app = express();
-// app.use(
-//     express.json()
-// )
-// const mysql = require('mysql2');
-// const path = require('path');
-// const { open } = require('sqlite');
-// const sqlite3 = require('sqlite3');
-
-// /*
-// -> to connect to the mysql server
-// -> we need to create a db
-// -> then we need to create a table
-// -> is to perform crud operations
-// */
-// let db = null;
-// const dbPath = path.join(__dirname, 'newdb.db')
-// const initDbAndServer = async () => {
-
-//     try {
-//         db = await open({
-//             filename: dbPath,
-//             driver: sqlite3.Database
-//         })
-
-//         app.listen(3006, () => {
-//             console.log("Server is running at http://localhost:3006/")
-//         })
-
-//     } catch (error) {
-//         console.error("Error initializing database:", error.message);
-//         process.exit(1);
-//     }
-// }
-
-
-// initDbAndServer();
-
-
-// const convertDbObjectToResponseObject = (dbObject) => {
-//     return {
-//         id: dbObject.id,
-//         name: dbObject.name,
-//         age: dbObject.age,
-//         course : dbObject.course,
-//     }
-// }
-
-
-// // get all students API
-// app.get('/students/', async (request, response) => {
-//     const getStudentsQuery = `SELECT * FROM students;`;
-//     const students = await db.all(getStudentsQuery);
-//     response.send(students.map(convertDbObjectToResponseObject));
-// });
