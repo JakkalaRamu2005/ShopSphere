@@ -1,10 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './Chatbot.css';
-<<<<<<< HEAD
-import {API_BASE_URL} from "../../config/api";
-=======
-import API_URL from "../../config/api";
->>>>>>> master
+import { API_BASE_URL as API_URL } from "../../config/api";
 
 export default function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
@@ -108,7 +104,7 @@ export default function Chatbot() {
   return (
     <>
       {/* Chat Button */}
-      <button 
+      <button
         className={`chatbot-toggle ${isOpen ? 'active' : ''}`}
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Toggle chatbot"
@@ -119,7 +115,7 @@ export default function Chatbot() {
       {/* Chat Window */}
       {isOpen && (
         <div className="chatbot-window">
-          
+
           {/* Header */}
           <div className="chatbot-header">
             <div className="chatbot-header-content">
@@ -129,7 +125,7 @@ export default function Chatbot() {
                 <span className="chatbot-status">● Online</span>
               </div>
             </div>
-            <button 
+            <button
               className="chatbot-close"
               onClick={() => setIsOpen(false)}
             >
@@ -140,22 +136,22 @@ export default function Chatbot() {
           {/* Messages */}
           <div className="chatbot-messages">
             {messages.map((msg, index) => (
-              <div 
-                key={index} 
+              <div
+                key={index}
                 className={`message ${msg.role === 'user' ? 'user-message' : 'bot-message'}`}
               >
                 <div className="message-content">
                   {msg.content}
                 </div>
                 <div className="message-time">
-                  {new Date(msg.timestamp).toLocaleTimeString('en-IN', { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
+                  {new Date(msg.timestamp).toLocaleTimeString('en-IN', {
+                    hour: '2-digit',
+                    minute: '2-digit'
                   })}
                 </div>
               </div>
             ))}
-            
+
             {isLoading && (
               <div className="message bot-message">
                 <div className="message-content typing-indicator">
@@ -165,7 +161,7 @@ export default function Chatbot() {
                 </div>
               </div>
             )}
-            
+
             <div ref={messagesEndRef} />
           </div>
 
@@ -173,7 +169,7 @@ export default function Chatbot() {
           {messages.length <= 2 && (
             <div className="quick-replies">
               {quickReplies.map((reply, index) => (
-                <button 
+                <button
                   key={index}
                   className="quick-reply-btn"
                   onClick={() => handleQuickReply(reply)}
@@ -194,7 +190,7 @@ export default function Chatbot() {
               onKeyPress={handleKeyPress}
               disabled={isLoading}
             />
-            <button 
+            <button
               onClick={sendMessage}
               disabled={isLoading || inputMessage.trim() === ''}
               className="send-btn"

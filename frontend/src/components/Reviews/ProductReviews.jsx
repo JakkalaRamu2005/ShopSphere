@@ -3,11 +3,7 @@ import { useAuth } from '../AuthContext';
 import ReviewForm from './ReviewForm';
 import ReviewList from './ReviewList';
 import './productreviews.css';
-<<<<<<< HEAD
 import { API_BASE_URL } from '../../config/api';
-=======
-import API_BASE_URL from '../../config/api';
->>>>>>> master
 
 function ProductReviews({ productId }) {
     const { user } = useAuth();

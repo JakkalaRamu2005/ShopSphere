@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import "./productdetails.css";
@@ -27,7 +26,7 @@ function ProductDetails() {
             description: data.product.description,
             category: data.product.category,
             image: data.product.image,
-            
+
             rating: {
               rate: parseFloat(data.product.rating_rate) || 0,
               count: parseInt(data.product.rating_count) || 0
@@ -74,13 +73,11 @@ function ProductDetails() {
   }
 
   return (
-    // console.log(product.image);
-    
     <div className="details-container">
-      
+
       {/* Image Section */}
       <div className="details-image-container">
-        
+
         <img src={product.image} alt={product.title} className="details-image" />
       </div>
 
@@ -141,126 +138,3 @@ function ProductDetails() {
 }
 
 export default ProductDetails;
-=======
-import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import "./productdetails.css";
-import { useCart } from "../CartContext";
-import ProductReviews from "../Reviews/ProductReviews";
-
-function ProductDetails() {
-  const { id } = useParams();
-  const [product, setProduct] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [addedToCart, setAddedToCart] = useState(false);
-  const { addToCart } = useCart();
-
-  useEffect(() => {
-    setLoading(true);
-    fetch(`https://fakestoreapi.com/products/${id}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setProduct(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.log(err);
-        setLoading(false);
-      });
-  }, [id]);
-
-  const handleAddToCart = () => {
-    addToCart(product);
-    setAddedToCart(true);
-
-    // Reset button after 2 seconds
-    setTimeout(() => {
-      setAddedToCart(false);
-    }, 2000);
-  };
-
-  if (loading) {
-    return (
-      <div className="loading-container">
-        <div className="loading-spinner"></div>
-        <p className="loading-text">Loading product details...</p>
-      </div>
-    );
-  }
-
-  if (!product) {
-    return (
-      <div className="loading-container">
-        <p className="loading-text">Product not found</p>
-        <Link to="/products" className="details-back-button">
-          Back to Products
-        </Link>
-      </div>
-    );
-  }
-
-  return (
-    <div className="details-container">
-      {/* Image Section */}
-      <div className="details-image-container">
-        <img src={product.image} alt={product.title} className="details-image" />
-      </div>
-
-      {/* Content Section */}
-      <div className="details-content">
-        <h1 className="details-title">{product.title}</h1>
-
-        <p className="details-category">
-          <strong>Category:</strong> {product.category}
-        </p>
-
-        <p className="details-price">₹{(product.price * 83).toFixed(2)}</p>
-
-        {/* Trust Badges */}
-        <div className="trust-badges">
-          <div className="trust-badge">
-            <span className="trust-badge-icon">✓</span>
-            <span>Secure Payment</span>
-          </div>
-          <div className="trust-badge">
-            <span className="trust-badge-icon">🚚</span>
-            <span>Free Shipping</span>
-          </div>
-          <div className="trust-badge">
-            <span className="trust-badge-icon">↩️</span>
-            <span>Easy Returns</span>
-          </div>
-        </div>
-
-        {/* Stock Indicator */}
-        <div className="stock-indicator">
-          <span>✓</span>
-          <span>In Stock - Ready to Ship</span>
-        </div>
-
-        <p className="details-description">{product.description}</p>
-
-        {/* Button Group */}
-        <div className="button-group">
-          <button
-            onClick={handleAddToCart}
-            className="details-add-to-cart-btn"
-            disabled={addedToCart}
-          >
-            {addedToCart ? "✓ Added to Cart!" : "🛒 Add to Cart"}
-          </button>
-
-          <Link to="/products" className="details-back-button">
-            ← Back to Products
-          </Link>
-        </div>
-      </div>
-
-      {/* Reviews Section */}
-      <ProductReviews productId={id} />
-    </div>
-  );
-}
-
-export default ProductDetails;
->>>>>>> master
