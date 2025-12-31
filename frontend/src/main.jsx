@@ -7,6 +7,10 @@ import { GoogleOAuthProvider } from '@react-oauth/google'
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
+if (!GOOGLE_CLIENT_ID) {
+    console.error("VITE_GOOGLE_CLIENT_ID is missing! Please check your environment variables and redeploy.");
+}
+
 // Add global fetch interceptor to handle authentication headers
 const originalFetch = window.fetch;
 window.fetch = async (...args) => {
