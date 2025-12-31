@@ -12,8 +12,17 @@ const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
 
     useEffect(() => {
+        const token = localStorage.getItem('token');
+        const headers = {
+            'Content-Type': 'application/json'
+        };
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
         fetch(`${API_URL}/auth/profile`, {
             method: "GET",
+            headers: headers,
             credentials: "include",
         })
             .then(res => {
@@ -24,12 +33,15 @@ const AuthProvider = ({ children }) => {
                 }
             })
             .then(data => {
-                setIsLoggedIn(true);
-                setUser(data.user);
+                if (data.success && data.user) {
+                    setIsLoggedIn(true);
+                    setUser(data.user);
+                }
             })
             .catch(() => {
                 setIsLoggedIn(false);
                 setUser(null);
+                // Don't remove token here as it might be a temporary network error
             })
             .finally(() => {
                 setLoading(false);
@@ -48,23 +60,35 @@ const AuthProvider = ({ children }) => {
             const data = await res.json();
             console.log(data);
 
-            if (res.ok) {
+            if (res.ok && data.token) {
+                // Save token to localStorage
+                localStorage.setItem('token', data.token);
+
                 setIsLoggedIn(true);
-                // Fetch user profile after login
-                const profileRes = await fetch(`${API_URL}/auth/profile`, {
-                    method: "GET",
-                    credentials: "include",
-                });
-                if (profileRes.ok) {
-                    const profileData = await profileRes.json();
-                    setUser(profileData.user);
-                }
+                setUser(data.user);
+
                 return { success: true, message: data.message };
             } else {
                 return { success: false, message: data.message };
             }
         } catch (error) {
+            console.error("Login error:", error);
             return { success: false, message: "An error occurred. Please try again" };
+        }
+    }
+
+    const logout = async () => {
+        try {
+            await fetch(`${API_URL}/auth/logout`, {
+                method: "POST",
+                credentials: "include",
+            });
+        } catch (error) {
+            console.error("Logout request error:", error);
+        } finally {
+            localStorage.removeItem('token');
+            setIsLoggedIn(false);
+            setUser(null);
         }
     }
 
@@ -73,7 +97,7 @@ const AuthProvider = ({ children }) => {
     }
 
     return (
-        <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn, loading, login, user, updateUser }}>{children}</AuthContext.Provider>
+        <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn, loading, login, logout, user, updateUser }}>{children}</AuthContext.Provider>
     )
 
 }

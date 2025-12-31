@@ -72,13 +72,23 @@ exports.login = async (request, response) => {
 
         console.log('Generated JWT for user', user.id, ':', token);
 
+        const isProduction = process.env.NODE_ENV === 'production';
+
         response.cookie('token', token, {
             httpOnly: true,
-            secure: false,
-            sameSite: 'Lax',
+            secure: true, // Always true for HTTPS (Render)
+            sameSite: 'None', // Required for cross-site cookies
             maxAge: 24 * 60 * 60 * 1000
         })
-        return response.status(200).json({ message: "Login successful" });
+        return response.status(200).json({
+            message: "Login successful",
+            token: token,
+            user: {
+                id: user.id,
+                email: user.email,
+                name: user.name
+            }
+        });
 
     } catch (error) {
         console.error(error);

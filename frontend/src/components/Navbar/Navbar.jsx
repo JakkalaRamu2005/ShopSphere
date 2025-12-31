@@ -8,7 +8,7 @@ import { useState, useRef, useEffect } from "react";
 import "./navbar.css";
 
 function Navbar() {
-  const { isLoggedIn, setIsLoggedIn, user } = useAuth();
+  const { isLoggedIn, setIsLoggedIn, user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { getCartCount } = useCart();
@@ -90,16 +90,8 @@ function Navbar() {
   }, [searchQuery]);
 
   const handleLogout = async () => {
-    try {
-      await fetch(`${API_URL}/auth/logout`, {
-        method: "POST",
-        credentials: "include",
-      });
-      setIsLoggedIn(false);
-      navigate("/");
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
+    await logout();
+    navigate("/");
   };
 
   // Search handlers

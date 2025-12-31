@@ -19,34 +19,29 @@ const productRoutes = require("./routes/products");
 const app = express();
 app.use(cookieParser());
 app.use(
-    express.json()
+  express.json()
 )
 
-// CORS Configuration for Development
-// CORS Configuration (Development only)
+// CORS Configuration
 const FRONTEND_URL = process.env.FRONTEND_URL;
+const allowedOrigins = [
+  FRONTEND_URL,
+  'https://shopsphere-store.netlify.app',
+  'http://localhost:5173',
+  'http://localhost:3000'
+].filter(Boolean);
 
 const corsOptions = {
   origin: function (origin, callback) {
-    // allow any tools like Postman / curl
     if (!origin) return callback(null, true);
-
-    // allow your frontend link
-    if (origin === FRONTEND_URL) {
+    if (allowedOrigins.includes(origin) || origin.startsWith("http://localhost:")) {
       return callback(null, true);
     }
-
-    // allow localhost for development
-    if (origin.startsWith("http://localhost:")) {
-      return callback(null, true);
-    }
-
-    // block anything else
     callback(new Error("Not allowed by CORS"));
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  allowedHeaders: ["Content-Type", "Authorization", "Accept"],
 };
 
 
@@ -68,7 +63,7 @@ app.use("/products", productRoutes);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
-    console.log(`Server is running at http://localhost:${PORT}/`)
+  console.log(`Server is running at http://localhost:${PORT}/`)
 })
 
 
