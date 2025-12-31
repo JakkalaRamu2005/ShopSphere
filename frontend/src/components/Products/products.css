@@ -5,6 +5,8 @@
 /* Page Container */
 .products-page {
   min-height: calc(100vh - 80px);
+  padding-top: 90px;
+  /* Account for fixed Navbar */
   background-color: var(--light-gray);
   animation: fadeIn 0.4s ease-out;
 }
@@ -87,7 +89,7 @@
   padding: 2rem 2rem 1.5rem;
   box-shadow: var(--shadow-sm);
   position: sticky;
-  top: 60px;
+  top: 85px;
   z-index: 100;
 }
 
@@ -648,11 +650,13 @@
 }
 
 .price-input {
+  width: 100%;
   padding: 0.7rem;
   border: 2px solid var(--medium-gray);
   border-radius: 8px;
   font-size: 0.95rem;
   transition: var(--transition);
+  box-sizing: border-box;
 }
 
 .price-input:focus {
