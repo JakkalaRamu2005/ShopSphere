@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { FaShoppingCart, FaBars, FaTimes, FaUser, FaBox, FaUserEdit, FaSignOutAlt, FaHeart } from 'react-icons/fa';
+import { FaShoppingCart, FaBars, FaTimes, FaUser, FaBox, FaUserEdit, FaSignOutAlt, FaHeart, FaShoppingBag } from 'react-icons/fa';
 import { useAuth } from "../AuthContext";
 import { useCart } from "../CartContext";
 import { useWishlist } from "../WishlistContext";
@@ -59,12 +59,16 @@ function Navbar() {
       // Set new timeout for debouncing
       searchTimeoutRef.current = setTimeout(async () => {
         try {
-          const response = await fetch(`${API_URL}/products?search=${encodeURIComponent(searchQuery)}`, {
+          const response = await fetch(`${API_URL}/products/search?q=${encodeURIComponent(searchQuery)}`, {
             credentials: "include",
           });
           const data = await response.json();
-          setSearchResults(data.slice(0, 8)); // Limit to 8 suggestions
-          setShowSuggestions(true);
+          if (data.success && data.products) {
+            setSearchResults(data.products.slice(0, 8)); // Limit to 8 suggestions
+            setShowSuggestions(true);
+          } else {
+            setSearchResults([]);
+          }
         } catch (error) {
           console.error("Search error:", error);
           setSearchResults([]);
@@ -85,9 +89,6 @@ function Navbar() {
     };
   }, [searchQuery]);
 
-  // Early return AFTER all hooks
-  if (!isLoggedIn) return null;
-
   const handleLogout = async () => {
     try {
       await fetch(`${API_URL}/auth/logout`, {
@@ -95,7 +96,7 @@ function Navbar() {
         credentials: "include",
       });
       setIsLoggedIn(false);
-      navigate("/login");
+      navigate("/");
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -179,8 +180,8 @@ function Navbar() {
       <div className="nav-container">
         {/* Brand/Logo */}
         <Link to="/" className="nav-brand" onClick={handleLinkClick}>
-          <span className="brand-icon">🛒</span>
-          <span className="brand-text">ShopEase</span>
+          <FaShoppingBag className="brand-icon" />
+          <span className="brand-text">ShopSphere</span>
         </Link>
 
         {/* Integrated Search Bar with Autocomplete */}
@@ -219,12 +220,12 @@ function Navbar() {
                   onMouseEnter={() => setSelectedIndex(index)}
                 >
                   <img
-                    src={product.image_url || '/placeholder-product.png'}
-                    alt={product.name}
+                    src={product.image || '/placeholder-product.png'}
+                    alt={product.title}
                     className="suggestion-image"
                   />
                   <div className="suggestion-details">
-                    <div className="suggestion-name">{product.name}</div>
+                    <div className="suggestion-name">{product.title}</div>
                     <div className="suggestion-price">₹{product.price}</div>
                   </div>
                 </div>
@@ -252,83 +253,95 @@ function Navbar() {
 
         {/* Right Side Actions */}
         <div className="nav-actions">
-          {/* Cart Icon with Badge */}
-          <Link to="/cart" className="cart-link" onClick={handleLinkClick}>
-            <div className="cart-icon-wrapper">
-              <FaShoppingCart size={22} />
-              {cartCount > 0 && (
-                <span className="cart-badge">{cartCount}</span>
-              )}
-            </div>
-            <span className="cart-text">Cart</span>
-          </Link>
-
-          {/* Profile Dropdown */}
-          <div className="profile-dropdown-container" ref={profileDropdownRef}>
-            <button
-              className="profile-btn"
-              onClick={toggleProfileDropdown}
-              aria-label="Profile menu"
-            >
-              <FaUser size={18} />
-              <span className="profile-name">{user?.name || 'Profile'}</span>
-            </button>
-
-            {/* Dropdown Menu */}
-            {isProfileDropdownOpen && (
-              <div className="profile-dropdown-menu">
-                <div className="dropdown-header">
-                  <FaUser size={20} />
-                  <div className="dropdown-user-info">
-                    <span className="dropdown-user-name">{user?.name || 'User'}</span>
-                    <span className="dropdown-user-email">{user?.email}</span>
-                  </div>
+          {isLoggedIn ? (
+            <>
+              {/* Cart Icon with Badge */}
+              <Link to="/cart" className="cart-link" onClick={handleLinkClick}>
+                <div className="cart-icon-wrapper">
+                  <FaShoppingCart size={22} />
+                  {cartCount > 0 && (
+                    <span className="cart-badge">{cartCount}</span>
+                  )}
                 </div>
-                <div className="dropdown-divider"></div>
+                <span className="cart-text">Cart</span>
+              </Link>
+
+              {/* Profile Dropdown */}
+              <div className="profile-dropdown-container" ref={profileDropdownRef}>
                 <button
-                  className="dropdown-item"
-                  onClick={() => handleProfileNavigation('/orders')}
+                  className="profile-btn"
+                  onClick={toggleProfileDropdown}
+                  aria-label="Profile menu"
                 >
-                  <FaBox size={16} />
-                  <span>My Orders</span>
+                  <FaUser size={18} />
+                  <span className="profile-name">{user?.name || 'Profile'}</span>
                 </button>
-                <button
-                  className="dropdown-item"
-                  onClick={() => handleProfileNavigation('/profile')}
-                >
-                  <FaUserEdit size={16} />
-                  <span>Edit Profile</span>
-                </button>
-                <button
-                  className="dropdown-item"
-                  onClick={() => handleProfileNavigation('/wishlist')}
-                >
-                  <FaHeart size={16} />
-                  <span>My Wishlist</span>
-                </button>
-                {user?.role === 'admin' && (
-                  <button
-                    className="dropdown-item"
-                    onClick={() => handleProfileNavigation('/admin')}
-                  >
-                    <span>⚙️</span>
-                    <span>Admin Dashboard</span>
-                  </button>
+
+                {/* Dropdown Menu */}
+                {isProfileDropdownOpen && (
+                  <div className="profile-dropdown-menu">
+                    <div className="dropdown-header">
+                      <FaUser size={20} />
+                      <div className="dropdown-user-info">
+                        <span className="dropdown-user-name">{user?.name || 'User'}</span>
+                        <span className="dropdown-user-email">{user?.email}</span>
+                      </div>
+                    </div>
+                    <div className="dropdown-divider"></div>
+                    <button
+                      className="dropdown-item"
+                      onClick={() => handleProfileNavigation('/orders')}
+                    >
+                      <FaBox size={16} />
+                      <span>My Orders</span>
+                    </button>
+                    <button
+                      className="dropdown-item"
+                      onClick={() => handleProfileNavigation('/profile')}
+                    >
+                      <FaUserEdit size={16} />
+                      <span>Edit Profile</span>
+                    </button>
+                    <button
+                      className="dropdown-item"
+                      onClick={() => handleProfileNavigation('/wishlist')}
+                    >
+                      <FaHeart size={16} />
+                      <span>My Wishlist</span>
+                    </button>
+                    {user?.role === 'admin' && (
+                      <button
+                        className="dropdown-item"
+                        onClick={() => handleProfileNavigation('/admin')}
+                      >
+                        <span>⚙️</span>
+                        <span>Admin Dashboard</span>
+                      </button>
+                    )}
+                    <div className="dropdown-divider"></div>
+                    <button
+                      className="dropdown-item logout-item"
+                      onClick={handleLogout}
+                    >
+                      <FaSignOutAlt size={16} />
+                      <span>Logout</span>
+                    </button>
+                  </div>
                 )}
-                <div className="dropdown-divider"></div>
-                <button
-                  className="dropdown-item logout-item"
-                  onClick={handleLogout}
-                >
-                  <FaSignOutAlt size={16} />
-                  <span>Logout</span>
-                </button>
               </div>
-            )}
-          </div>
+            </>
+          ) : (
+            /* Login Button for Non-Authenticated Users */
+            <button
+              className="login-btn"
+              onClick={() => navigate('/login')}
+            >
+              Login
+            </button>
+          )}
         </div>
       </div>
-    </nav>
+    </nav >
   );
 }
 

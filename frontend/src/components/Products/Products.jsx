@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import "./products.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useCart } from "../CartContext";
 import { useWishlist } from "../WishlistContext";
 import ProductRatingBadge from "./ProductRatingBadge";
 import { API_BASE_URL } from "../../config/api";
+import SkeletonCard from "../Skeleton/SkeletonCard";
 
 function Products() {
   const [products, setProducts] = useState([]);
@@ -13,6 +14,7 @@ function Products() {
   const [searchQuery, setSearchQuery] = useState("");
   const [productsPerpage] = useState(8);
   const navigate = useNavigate();
+  const location = useLocation();
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
 
@@ -80,10 +82,6 @@ function Products() {
         } else {
           setProducts([]);
         }
-        const minPrice = Math.floor(Math.min(...prices));
-        const maxPrice = Math.ceil(Math.max(...prices));
-        setPriceRange({ min: minPrice, max: maxPrice });
-
       } catch (err) {
         console.error('Error fetching products:', err);
       } finally {
@@ -105,6 +103,17 @@ function Products() {
       setRecentSearches(JSON.parse(storedSearches));
     }
   }, []);
+
+  // Update search query from URL parameters
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const q = params.get('search');
+    if (q) {
+      setSearchQuery(q);
+      // Ensure we clear any selected category if we are searching (optional, but good UX)
+      // setSelectedCategory("all"); 
+    }
+  }, [location.search]);
 
   const handleCardClick = (id) => {
     // Track recently viewed
@@ -691,9 +700,10 @@ function Products() {
 
           {/* Products Grid */}
           {loading ? (
-            <div className="loading-message">
-              <div className="loading-spinner"></div>
-              <p>Loading products...</p>
+            <div className="products-grid">
+              {[...Array(8)].map((_, i) => (
+                <SkeletonCard key={i} />
+              ))}
             </div>
           ) : (
             <>
@@ -809,7 +819,7 @@ function Products() {
                               className="add-to-cart-btn primary"
                               onClick={(e) => handleAddToCart(e, product)}
                             >
-                              🛒 Add to Cart
+                              Add to Cart
                             </button>
 
                             {/* Quick Actions on Hover */}

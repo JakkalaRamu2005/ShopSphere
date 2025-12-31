@@ -106,9 +106,9 @@
   box-sizing: border-box;
 }
 
-.categories-grid {
+.home-categories-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 2rem;
   margin-top: 2rem;
   width: 100%;
@@ -468,7 +468,7 @@
     padding: 2rem 1rem;
   }
 
-  .categories-grid,
+  .home-categories-grid,
   .featured-grid,
   .trust-grid {
     grid-template-columns: 1fr;
@@ -587,7 +587,7 @@
     padding: 1.5rem 0.5rem;
   }
 
-  .categories-grid {
+  .home-categories-grid {
     gap: 1rem;
   }
 
@@ -700,5 +700,3 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
-
-

@@ -1,66 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
-import { useCart } from "../CartContext";
 import Carousel from "../Carousel/Carousel";
+import Products from "../Products/Products";
 import "./home.css";
-import { API_BASE_URL } from "../../config/api";
 
 function Home() {
-  const [featuredProducts, setFeaturedProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const { addToCart } = useCart();
-
-  // Fetch featured products (high-rated products)
-  useEffect(() => {
-    fetch(`${API_BASE_URL}/products/featured?limit=4`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success && data.products) {
-          // Format products to match expected structure
-          const formattedProducts = data.products.map(p => ({
-            id: p.id,
-            title: p.title,
-            price: parseFloat(p.price) / 83, // Convert INR to USD
-            description: p.description,
-            category: p.category,
-            image: p.image,
-            rating: {
-              rate: parseFloat(p.rating_rate) || 0,
-              count: parseInt(p.rating_count) || 0
-            }
-          }));
-          setFeaturedProducts(formattedProducts);
-        }
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.log(err);
-        setLoading(false);
-      });
-  }, []);
 
   const handleShopNow = () => {
     navigate("/products");
   };
 
-  const handleProductClick = (id) => {
-    navigate(`/products/${id}`);
-  };
-
-  const handleAddToCart = (e, product) => {
-    e.stopPropagation();
-    addToCart(product);
-  };
-
   const handleCategoryClick = (category) => {
     navigate("/products", { state: { category } });
-  };
-
-  // Format price properly
-  const formatPrice = (price) => {
-    const inrPrice = price * 83;
-    return `₹${inrPrice.toFixed(2)}`;
   };
 
   const categories = [
@@ -94,7 +46,7 @@ function Home() {
       {/* Categories Section */}
       <section className="categories-section">
         <h2 className="section-title">Shop by Category</h2>
-        <div className="categories-grid">
+        <div className="home-categories-grid">
           {categories.map((category, index) => (
 
             <div
@@ -119,50 +71,8 @@ function Home() {
         </div>
       </section>
 
-      {/* Featured Products Section */}
-      <section className="featured-section">
-        <h2 className="section-title">Featured Products</h2>
-        {loading ? (
-          <p className="loading-text">Loading featured products...</p>
-        ) : (
-          <div className="featured-grid">
-            {featuredProducts.map((product) => (
-              <div
-                key={product.id}
-                className="featured-card"
-                onClick={() => handleProductClick(product.id)}
-              >
-                <div className="featured-image-wrapper">
-                  <img
-                    src={product.image}
-                    alt={product.title}
-                    onError={(e) => {
-                      e.target.src = "https://placehold.co/200x200?text=No+Image";
-                    }}
-                  />
-                </div>
-
-                <h3 className="featured-title" title={product.title}>
-                  {product.title}
-                </h3>
-                <p className="featured-category">{product.category}</p>
-                <p className="featured-price">{formatPrice(product.price)}</p>
-                <button
-                  className="featured-btn"
-                  onClick={(e) => handleAddToCart(e, product)}
-                >
-                  Add to Cart
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-        <div className="view-all-container">
-          <button className="view-all-btn" onClick={handleShopNow}>
-            View All Products
-          </button>
-        </div>
-      </section>
+      {/* All Products Section */}
+      {/* <Products /> */}
 
       {/* Trust Signals Section */}
       <section className="trust-section">

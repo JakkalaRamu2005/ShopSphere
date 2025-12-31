@@ -90,30 +90,13 @@ function ProductDetails() {
         </p>
 
         <p className="details-price">₹{(product.price * 83).toFixed(2)}</p>
-
-        {/* Trust Badges */}
-        <div className="trust-badges">
-          <div className="trust-badge">
-            <span className="trust-badge-icon">✓</span>
-            <span>Secure Payment</span>
-          </div>
-          <div className="trust-badge">
-            <span className="trust-badge-icon">🚚</span>
-            <span>Free Shipping</span>
-          </div>
-          <div className="trust-badge">
-            <span className="trust-badge-icon">↩️</span>
-            <span>Easy Returns</span>
-          </div>
-        </div>
+        <p className="details-description">{product.description}</p>
 
         {/* Stock Indicator */}
         <div className="stock-indicator">
           <span>✓</span>
           <span>In Stock - Ready to Ship</span>
         </div>
-
-        <p className="details-description">{product.description}</p>
 
         {/* Button Group */}
         <div className="button-group">
@@ -122,7 +105,7 @@ function ProductDetails() {
             className="details-add-to-cart-btn"
             disabled={addedToCart}
           >
-            {addedToCart ? "✓ Added to Cart!" : "🛒 Add to Cart"}
+            {addedToCart ? "✓ Added to Cart!" : "Add to Cart"}
           </button>
 
           <Link to="/products" className="details-back-button">
@@ -132,7 +115,9 @@ function ProductDetails() {
       </div>
 
       {/* Reviews Section */}
-      <ProductReviews productId={id} />
+      <div className="details-reviews">
+        <ProductReviews productId={id} />
+      </div>
     </div>
   );
 }

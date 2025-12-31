@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 import { API_BASE_URL } from '../../config/api';
+import {
+    LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
+} from 'recharts';
 import './admindashboard.css';
 
 function AdminDashboard() {
@@ -125,6 +128,57 @@ function AdminDashboard() {
                         <h3>Total Products</h3>
                         <p className="stat-value">{analytics?.totalProducts || 0}</p>
                     </div>
+                </div>
+            </div>
+
+            {/* Charts Section */}
+            <div className="charts-grid">
+                {/* Sales Over Time Chart */}
+                <div className="chart-container">
+                    <h3>Sales Over Time (Last 30 Days)</h3>
+                    <ResponsiveContainer width="100%" height="100%">
+                        <LineChart
+                            data={analytics?.salesLast30Days || []}
+                            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                        >
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis
+                                dataKey="date"
+                                tickFormatter={(date) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            />
+                            <YAxis />
+                            <Tooltip
+                                formatter={(value) => [`₹${value}`, 'Revenue']}
+                                labelFormatter={(date) => new Date(date).toLocaleDateString()}
+                            />
+                            <Legend />
+                            <Line
+                                type="monotone"
+                                dataKey="revenue"
+                                stroke="#667eea"
+                                activeDot={{ r: 8 }}
+                                name="Revenue"
+                            />
+                        </LineChart>
+                    </ResponsiveContainer>
+                </div>
+
+                {/* Orders per Category Chart */}
+                <div className="chart-container">
+                    <h3>Orders per Category</h3>
+                    <ResponsiveContainer width="100%" height="100%">
+                        <BarChart
+                            data={analytics?.salesByCategory || []}
+                            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                        >
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="category" />
+                            <YAxis />
+                            <Tooltip />
+                            <Legend />
+                            <Bar dataKey="count" fill="#10b981" name="Number of Orders" />
+                        </BarChart>
+                    </ResponsiveContainer>
                 </div>
             </div>
 

@@ -11,6 +11,14 @@ const razorpay = new Razorpay({
 // Create Razorpay Order
 const createOrder = async (req, res) => {
     try {
+        if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+            console.error('Razorpay keys missing');
+            return res.status(500).json({
+                success: false,
+                message: 'Razorpay API keys are not configured. Please add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET to backend .env file.'
+            });
+        }
+
         const { amount, currency = 'INR' } = req.body;
         const userId = req.user.id;
 
@@ -44,7 +52,7 @@ const createOrder = async (req, res) => {
         console.error('Create order error:', error);
         res.status(500).json({
             success: false,
-            message: 'Failed to create payment order'
+            message: error.description || error.message || 'Failed to create payment order'
         });
     }
 };

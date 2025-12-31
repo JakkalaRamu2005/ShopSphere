@@ -294,7 +294,32 @@ const getAnalytics = async (req, res) => {
             FROM orders
             WHERE created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
             GROUP BY DATE_FORMAT(created_at, '%Y-%m')
-            ORDER BY month DESC
+            ORDER BY month ASC
+        `);
+
+        // Sales last 30 days (Daily)
+        const [salesLast30Days] = await db.query(`
+            SELECT 
+                DATE_FORMAT(created_at, '%Y-%m-%d') as date,
+                SUM(total_amount) as revenue,
+                COUNT(*) as orders
+            FROM orders
+            WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+            GROUP BY DATE_FORMAT(created_at, '%Y-%m-%d')
+            ORDER BY date ASC
+        `);
+
+        // Sales by Category
+        const [salesByCategory] = await db.query(`
+            SELECT 
+                p.category,
+                COUNT(oi.id) as count,
+                SUM(oi.price * oi.quantity) as revenue
+            FROM order_items oi
+            JOIN products p ON oi.product_id = p.id
+            GROUP BY p.category
+            ORDER BY revenue DESC
+            LIMIT 6
         `);
 
         res.json({
@@ -306,7 +331,9 @@ const getAnalytics = async (req, res) => {
                 totalProducts: productsResult[0].total_products,
                 recentOrders,
                 ordersByStatus,
-                salesByMonth
+                salesByMonth,
+                salesLast30Days,
+                salesByCategory
             }
         });
     } catch (error) {

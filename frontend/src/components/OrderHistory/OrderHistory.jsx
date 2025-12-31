@@ -15,19 +15,29 @@ function OrderHistory() {
     const [stats, setStats] = useState(null);
     const navigate = useNavigate();
 
-    // Fetch orders on component mount
+    // Fetch orders on component mount and setup polling
     useEffect(() => {
         fetchOrders();
         fetchOrderStats();
+
+        // Poll for updates every 5 seconds
+        const intervalId = setInterval(() => {
+            fetchOrders(true); // Polling mode (silent)
+        }, 5000);
+
+        return () => clearInterval(intervalId);
     }, []);
 
     /**
      * Fetch all orders for the current user
+     * @param {boolean} isPolling - If true, suppresses loading state
      */
-    const fetchOrders = async () => {
+    const fetchOrders = async (isPolling = false) => {
         try {
-            setLoading(true);
-            setError(null);
+            if (!isPolling) {
+                setLoading(true);
+                setError(null);
+            }
 
             const response = await fetch(`${API_BASE_URL}/orders`, {
                 method: "GET",
@@ -40,15 +50,19 @@ function OrderHistory() {
             const data = await response.json();
 
             if (response.ok && data.success) {
+                // If polling, we might want to check for changes before setting state
+                // But simply setting state works fine for this requirement
                 setOrders(data.orders);
-            } else {
+            } else if (!isPolling) {
                 setError(data.message || "Failed to fetch orders");
             }
         } catch (err) {
             console.error("Fetch orders error:", err);
-            setError("Unable to load orders. Please try again later.");
+            if (!isPolling) {
+                setError("Unable to load orders. Please try again later.");
+            }
         } finally {
-            setLoading(false);
+            if (!isPolling) setLoading(false);
         }
     };
 

@@ -1,4 +1,5 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const db = require('../db');
 
 // Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -49,17 +50,27 @@ const chatWithBot = async (req, res) => {
     const { message, conversationHistory = [] } = req.body;
 
     if (!message || message.trim() === "") {
-      return res.status(400).json({ 
-        error: "Message is required" 
+      return res.status(400).json({
+        error: "Message is required"
       });
     }
+
+    // Fetch top products from DB to give context
+    const [products] = await db.query('SELECT title, price, category FROM products LIMIT 30');
+    const productList = products.map(p => `- ${p.title} (₹${p.price}) [${p.category}]`).join('\n');
 
     // Initialize the model
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     // Build conversation context
-    let prompt = SHOPSPHERE_CONTEXT + "\n\n";
-    
+    let prompt = SHOPSPHERE_CONTEXT;
+
+    prompt += `\n\n**Currently Available Top Products:**\n${productList}\n\n`;
+    prompt += "**Instructions for Product Recommendations:**\n";
+    prompt += "- Only recommend products listed above.\n";
+    prompt += "- Include the price in ₹.\n";
+    prompt += "- If the user asks for something not listed, politely say we don't have it but suggest closest alternatives from the list.\n\n";
+
     // Add conversation history
     if (conversationHistory.length > 0) {
       prompt += "Previous conversation:\n";

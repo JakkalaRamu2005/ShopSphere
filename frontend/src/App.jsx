@@ -25,7 +25,7 @@ import Payment from "./components/Payment/Payment";
 import PaymentSuccess from "./components/Payment/PaymentSuccess";
 import PaymentFailure from "./components/Payment/PaymentFailure";
 import Carousel from "./components/Carousel/Carousel";
-import Chatbot from "./components/Chatbot/Chatbot";
+import ChatbotWrapper from "./components/Chatbot/ChatbotWrapper";
 
 // Footer-related components
 
@@ -56,26 +56,34 @@ function App() {
             <Navbar />
             <Routes>
 
+              {/* Public Routes - No Login Required */}
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
 
-              <Route element={<ProtectedRoute />}>
-                {/* Home Route with Footer */}
-                <Route
-                  path="/"
-                  element={
-                    <>
-                      <Home />
-                      <Footer />
-                    </>
-                  }
-                />
+              {/* Home and Product Browsing - Public */}
+              <Route path="/" element={<><Home /><Footer /></>} />
+              <Route path="/products" element={<><Products /><Footer /></>} />
+              <Route path="/products/:id" element={<><ProductDetails /><Footer /></>} />
+              <Route path="/about" element={<><About /><Footer /></>} />
 
-                <Route path="/cart" element={<><Cart /><Footer /></>}></Route>
-                <Route path="/wishlist" element={<><Wishlist /><Footer /></>}></Route>
-                <Route path="products" element={<><Products /><Footer /></>}></Route>
-                <Route path="/about" element={<><About /><Footer /></>}></Route>
-                <Route path="/products/:id" element={<><ProductDetails /><Footer /></>} />
+              {/* Footer Pages - Public */}
+              <Route path="/shipping" element={<><ShippingInfo /><Footer /></>} />
+              <Route path="/returns" element={<><ReturnsRefunds /><Footer /></>} />
+              <Route path="/track-order" element={<><TrackOrder /><Footer /></>} />
+              <Route path="/size-guide" element={<><SizeGuide /><Footer /></>} />
+              <Route path="/faq" element={<><FAQ /><Footer /></>} />
+              <Route path="/contact" element={<><ContactUs /><Footer /></>} />
+              <Route path="/about-us" element={<><AboutUs /><Footer /></>} />
+              <Route path="/careers" element={<><Careers /><Footer /></>} />
+              <Route path="/blog" element={<><Blog /><Footer /></>} />
+              <Route path="/privacy" element={<><PrivacyPolicy /><Footer /></>} />
+              <Route path="/terms" element={<><TermsConditions /><Footer /></>} />
+              <Route path="/sitemap" element={<><Sitemap /><Footer /></>} />
+
+              {/* Protected Routes - Login Required */}
+              <Route element={<ProtectedRoute />}>
+                <Route path="/cart" element={<><Cart /><Footer /></>} />
+                <Route path="/wishlist" element={<><Wishlist /><Footer /></>} />
                 <Route path="/checkout" element={<><Checkout /><Footer /></>} />
                 <Route path="/orders" element={<><OrderHistory /><Footer /></>} />
                 <Route path="/orders/:orderId" element={<><OrderDetails /><Footer /></>} />
@@ -87,30 +95,11 @@ function App() {
                 <Route path="/payment" element={<><Payment /><Footer /></>} />
                 <Route path="/payment/success" element={<><PaymentSuccess /><Footer /></>} />
                 <Route path="/payment/failure" element={<><PaymentFailure /><Footer /></>} />
-
-                {/* Footer Pages Routes */}
-                <Route path="/shipping" element={<><ShippingInfo /><Footer /></>} />
-                <Route path="/returns" element={<><ReturnsRefunds /><Footer /></>} />
-                <Route path="/track-order" element={<><TrackOrder /><Footer /></>} />
-                <Route path="/size-guide" element={<><SizeGuide /><Footer /></>} />
-
-                {/* FAQ and Contact Routes */}
-                <Route path="/faq" element={<><FAQ /><Footer /></>} />
-                <Route path="/contact" element={<><ContactUs /><Footer /></>} />
-                <Route path="/about-us" element={<><AboutUs /><Footer /></>} />
-                <Route path="/careers" element={<><Careers /><Footer /></>} />
-                <Route path="/blog" element={<><Blog /><Footer /></>} />
-
-                {/* Legal Pages */}
-                <Route path="/privacy" element={<><PrivacyPolicy /><Footer /></>} />
-                <Route path="/terms" element={<><TermsConditions /><Footer /></>} />
-                <Route path="/sitemap" element={<><Sitemap /><Footer /></>} />
               </Route>
 
-
-              <Route path="*" element={<NotFound />}></Route>
+              <Route path="*" element={<NotFound />} />
             </Routes>
-            <Chatbot />
+            <ChatbotWrapper />
           </BrowserRouter>
         </WishlistProvider>
       </CartProvider>

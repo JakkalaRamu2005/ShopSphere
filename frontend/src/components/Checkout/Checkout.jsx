@@ -24,6 +24,7 @@ function Checkout() {
   });
 
   const [paymentMethod, setPaymentMethod] = useState("cod");
+  const [upiId, setUpiId] = useState("");
 
   const getSubtotal = () => getCartTotal();
   const getDiscount = () => appliedCoupon ? appliedCoupon.discountAmount : 0;
@@ -111,25 +112,43 @@ function Checkout() {
       newErrors.pincode = "Please enter a valid 6-digit pincode";
     }
 
+    // Validate UPI ID if method is UPI
+    if (paymentMethod === 'upi' && !upiId.trim()) {
+      alert("Please enter a valid UPI ID to proceed.");
+      return false;
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  // Load Razorpay Script
+  const loadRazorpay = () => {
+    return new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!validateForm()) {
+      // Alert handled in validateForm for UPI, general validation here
+      if (!Object.values(errors).length) return;
       alert("Please fix the errors in the form");
       return;
     }
 
     setLoading(true);
     try {
+      // 1. Create Order in Backend (Database)
       const response = await fetch(`${API_BASE_URL}/checkout/create-order`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
           shippingAddress,
@@ -143,16 +162,90 @@ function Checkout() {
 
       const data = await response.json();
 
-      if (response.ok) {
-        alert(`Order placed successfully! Order ID: ${data.orderId}`);
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to place order");
+      }
+
+      const { orderId } = data;
+
+      // 2. Handle Payment based on Method
+      if (paymentMethod === 'cod') {
+        alert(`Order placed successfully! Order ID: ${orderId}`);
         clearCart();
         navigate("/orders");
       } else {
-        alert(data.message || "Failed to place order");
+        // Online Payment (Razorpay)
+        const res = await loadRazorpay();
+        if (!res) {
+          alert('Razorpay SDK failed to load. Are you online?');
+          return;
+        }
+
+        // Create Razorpay Order
+        const paymentRes = await fetch(`${API_BASE_URL}/payment/create-order`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ amount: getFinalTotal() })
+        });
+
+        const paymentData = await paymentRes.json();
+        if (!paymentData.success) {
+          alert(paymentData.message || "Could not create payment order");
+          return;
+        }
+
+        const options = {
+          key: paymentData.key,
+          amount: paymentData.order.amount,
+          currency: paymentData.order.currency,
+          name: "ShopSphere",
+          description: `Order #${orderId}`,
+          image: "https://via.placeholder.com/150",
+          order_id: paymentData.order.id,
+          handler: async function (response) {
+            // Verify Payment
+            const verifyRes = await fetch(`${API_BASE_URL}/payment/verify`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                order_id: orderId
+              })
+            });
+
+            const verifyData = await verifyRes.json();
+
+            if (verifyData.success) {
+              alert("Payment Successful!");
+              clearCart();
+              navigate("/orders");
+            } else {
+              alert("Payment Verification Failed");
+              navigate("/payment/failure");
+            }
+          },
+          prefill: {
+            name: shippingAddress.fullName,
+            contact: shippingAddress.phoneNumber,
+            email: "",
+            vpa: paymentMethod === 'upi' ? upiId : undefined // Prefill UPI VPA if available
+          },
+          theme: {
+            color: "#667eea"
+          }
+        };
+
+        const paymentObject = new window.Razorpay(options);
+        paymentObject.open();
       }
+
     } catch (error) {
       console.error("Checkout error:", error);
-      alert("An error occurred. Please try again.");
+      alert(error.message || "An error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -321,8 +414,22 @@ function Checkout() {
                     checked={paymentMethod === "upi"}
                     onChange={(e) => setPaymentMethod(e.target.value)}
                   />
-                  <span className="payment-icon">📱</span>
-                  <span className="payment-label">UPI</span>
+                  <div className="payment-method-details">
+                    <span className="payment-icon">📱</span>
+                    <span className="payment-label">UPI (PhonePe / GPay / Paytm)</span>
+                    {paymentMethod === "upi" && (
+                      <div className="upi-input-container">
+                        <input
+                          type="text"
+                          placeholder="Enter your UPI ID (e.g. 9876543210@ybl)"
+                          value={upiId}
+                          onChange={(e) => setUpiId(e.target.value)}
+                          className="upi-input"
+                        />
+                        <p className="upi-helper">We'll send a payment request to your UPI app.</p>
+                      </div>
+                    )}
+                  </div>
                 </label>
 
                 <label className={`radio-option ${paymentMethod === "card" ? "selected" : ""}`}>
@@ -333,14 +440,21 @@ function Checkout() {
                     checked={paymentMethod === "card"}
                     onChange={(e) => setPaymentMethod(e.target.value)}
                   />
-                  <span className="payment-icon">💳</span>
-                  <span className="payment-label">Credit/Debit Card</span>
+                  <div className="payment-method-details">
+                    <span className="payment-icon">💳</span>
+                    <span className="payment-label">Credit / Debit Card</span>
+                    {paymentMethod === "card" && (
+                      <div className="card-info">
+                        <p>You will be redirected to the secure payment gateway to enter card details.</p>
+                      </div>
+                    )}
+                  </div>
                 </label>
               </div>
             </div>
 
             <button type="submit" className="place-order-btn" disabled={loading}>
-              {loading ? "Placing Order..." : `Place Order - ₹${getFinalTotal().toFixed(2)}`}
+              {loading ? "Processing..." : `Pay ₹${getFinalTotal().toFixed(2)}`}
             </button>
           </form>
         </div>

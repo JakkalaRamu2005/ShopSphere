@@ -1,5 +1,7 @@
 import { useState } from "react";
 import styles from "./Footer.module.css";
+import { FaFacebook, FaInstagram, FaYoutube } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
 
 export default function Footer() {
   const [email, setEmail] = useState("");
@@ -18,17 +20,17 @@ export default function Footer() {
   return (
     <footer className={styles.footer}>
       <div className={styles.container}>
-        
+
         {/* Column 1: Brand + Newsletter */}
         <div className={styles.column}>
           <h3 className={styles.brand}>ShopEase</h3>
           <p className={styles.tagline}>Your trusted online store</p>
-          
+
           <div className={styles.newsletter}>
             <h4 className={styles.newsletterTitle}>Subscribe to our newsletter</h4>
             <form onSubmit={handleSubscribe} className={styles.form}>
-              <input 
-                type="email" 
+              <input
+                type="email"
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -115,16 +117,16 @@ export default function Footer() {
             <h4 className={styles.heading}>Follow Us</h4>
             <div className={styles.social}>
               <a href="https://facebook.com" aria-label="Facebook" target="_blank" rel="noopener noreferrer">
-                <span className={styles.socialIcon}>📘</span>
+                <FaFacebook size={20} />
               </a>
               <a href="https://instagram.com" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
-                <span className={styles.socialIcon}>📷</span>
+                <FaInstagram size={20} />
               </a>
               <a href="https://twitter.com" aria-label="Twitter" target="_blank" rel="noopener noreferrer">
-                <span className={styles.socialIcon}>🐦</span>
+                <FaXTwitter size={20} />
               </a>
               <a href="https://youtube.com" aria-label="YouTube" target="_blank" rel="noopener noreferrer">
-                <span className={styles.socialIcon}>▶️</span>
+                <FaYoutube size={20} />
               </a>
             </div>
           </div>

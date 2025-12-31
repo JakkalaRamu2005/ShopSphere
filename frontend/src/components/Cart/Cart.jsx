@@ -1,6 +1,7 @@
 import { useCart } from "../CartContext";
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { FaTrash } from 'react-icons/fa';
 import "./cart.css";
 
 
@@ -34,16 +35,6 @@ function Cart() {
 
   return (
     <>
-      <div className="cart-header">
-        <h1>Your Cart</h1>
-        {cartItems.length > 0 && (
-          <button className="clear-all-btn" onClick={handleClearCart}>
-            Clear All Items
-          </button>
-        )}
-      </div>
-
-
       {showConfirmModal && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -59,7 +50,14 @@ function Cart() {
         </div>
       )}
       <div className="cart-container">
-        <h1>Your Cart</h1>
+        <div className="cart-header">
+          <h1>Your Cart</h1>
+          {cartItems.length > 0 && (
+            <button className="clear-all-btn" onClick={handleClearCart}>
+              Clear All Items
+            </button>
+          )}
+        </div>
 
         <div className="cart-items">
           {cartItems.map((item) => (
@@ -89,8 +87,8 @@ function Cart() {
                 <p className="cart-item-subtotal">
                   ₹{((item.price * 83) * item.quantity).toFixed(2)}
                 </p>
-                <button className="remove-btn" onClick={() => removeFromCart(item.id)}>
-                  Remove
+                <button className="remove-btn" onClick={() => removeFromCart(item.id)} aria-label="Remove item">
+                  <FaTrash />
                 </button>
               </div>
             </div>
