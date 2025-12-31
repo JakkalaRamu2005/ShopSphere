@@ -1,11 +1,10 @@
 {
   "buildCommand": "npm run build",
-<<<<<<< HEAD
   "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
   ]
-=======
-  "outputDirectory": "dist"
->>>>>>> master
 }
