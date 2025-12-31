@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../AuthContext';
 
-import {API_BASE_URL} from '../../config/api';
+import { API_BASE_URL } from '../../config/api';
 
 import './adminusers.css';
 
@@ -83,7 +83,7 @@ function AdminUsers() {
                 <h1>User Management</h1>
             </div>
 
-            <div className="users-table-container">
+            <div className="users-table-container desktop-view">
                 <table className="admin-table">
                     <thead>
                         <tr>
@@ -131,13 +131,52 @@ function AdminUsers() {
                         ))}
                     </tbody>
                 </table>
-
-                {users.length === 0 && (
-                    <div className="no-data">
-                        <p>No users found</p>
-                    </div>
-                )}
             </div>
+
+            {/* Mobile View Cards */}
+            <div className="users-mobile-grid mobile-view">
+                {users.map((u) => (
+                    <div key={u.id} className="user-mobile-card">
+                        <div className="card-top">
+                            <div className="user-info">
+                                <p className="user-name">{u.name || 'N/A'}</p>
+                                <p className="user-email">{u.email}</p>
+                            </div>
+                            <div className="user-badges">
+                                <span className={`role-badge ${u.role}`}>{u.role}</span>
+                                <span className={`status-badge ${u.status}`}>{u.status}</span>
+                            </div>
+                        </div>
+                        <div className="card-details">
+                            <div className="detail-row">
+                                <span>ID: #{u.id}</span>
+                                <span>Orders: {u.order_count}</span>
+                            </div>
+                            <p className="joined-date">Joined: {formatDate(u.created_at)}</p>
+                        </div>
+                        <div className="user-card-actions">
+                            {u.id !== user.id && u.role !== 'admin' ? (
+                                <button
+                                    onClick={() => handleToggleStatus(u.id, u.status)}
+                                    className={u.status === 'active' ? 'block-btn' : 'unblock-btn'}
+                                >
+                                    {u.status === 'active' ? 'Block User' : 'Unblock User'}
+                                </button>
+                            ) : (
+                                <span className="action-restricted">
+                                    {u.id === user.id ? "Your Profile" : "Admin Account"}
+                                </span>
+                            )}
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {users.length === 0 && !loading && (
+                <div className="no-data">
+                    <p>No users found</p>
+                </div>
+            )}
         </div>
     );
 }

@@ -12,8 +12,8 @@ function ReviewForm({ productId, onReviewSubmitted, existingReview = null }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (rating === 0) {
-            setError('Please select a rating');
+        if (rating === 0 && (!reviewText || !reviewText.trim())) {
+            setError('Please provide either a rating or a comment');
             return;
         }
 
@@ -21,8 +21,14 @@ function ReviewForm({ productId, onReviewSubmitted, existingReview = null }) {
         setError('');
 
         try {
-            const response = await fetch(`${API_BASE_URL}/reviews`, {
-                method: 'POST',
+            const url = existingReview
+                ? `${API_BASE_URL}/reviews/${existingReview.id}`
+                : `${API_BASE_URL}/reviews`;
+
+            const method = existingReview ? 'PUT' : 'POST';
+
+            const response = await fetch(url, {
+                method,
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -37,13 +43,15 @@ function ReviewForm({ productId, onReviewSubmitted, existingReview = null }) {
             const data = await response.json();
 
             if (data.success) {
-                setRating(0);
-                setReviewText('');
+                if (!existingReview) {
+                    setRating(0);
+                    setReviewText('');
+                }
                 if (onReviewSubmitted) {
                     onReviewSubmitted();
                 }
             } else {
-                setError(data.message || 'Failed to submit review');
+                setError(data.message || 'Failed to submit feedback');
             }
         } catch (err) {
             console.error('Error submitting review:', err);
@@ -55,10 +63,10 @@ function ReviewForm({ productId, onReviewSubmitted, existingReview = null }) {
 
     return (
         <div className="review-form-container">
-            <h3 className="review-form-title">Write a Review</h3>
+            <h3 className="review-form-title">Post a Comment or Review</h3>
             <form onSubmit={handleSubmit} className="review-form">
                 <div className="form-group">
-                    <label className="form-label">Your Rating *</label>
+                    <label className="form-label">Your Rating (Optional)</label>
                     <StarRating
                         rating={rating}
                         onRatingChange={setRating}
@@ -72,7 +80,7 @@ function ReviewForm({ productId, onReviewSubmitted, existingReview = null }) {
                         className="review-textarea"
                         value={reviewText}
                         onChange={(e) => setReviewText(e.target.value)}
-                        placeholder="Share your experience with this product..."
+                        placeholder="Write your comment or share your experience here..."
                         rows="5"
                         maxLength="1000"
                     />
@@ -84,9 +92,9 @@ function ReviewForm({ productId, onReviewSubmitted, existingReview = null }) {
                 <button
                     type="submit"
                     className="submit-review-btn"
-                    disabled={isSubmitting || rating === 0}
+                    disabled={isSubmitting || (rating === 0 && !reviewText.trim())}
                 >
-                    {isSubmitting ? 'Submitting...' : 'Submit Review'}
+                    {isSubmitting ? 'Submitting...' : (existingReview ? 'Update Feedback' : 'Submit Feedback')}
                 </button>
             </form>
         </div>

@@ -6,11 +6,12 @@ const db = require("../db");
 const bcrypt = require("bcrypt");
 
 
-const { register, login, logout, getUserProfile, updateProfile, changePassword } = require('../controllers/authController');
+const { register, login, googleLogin, logout, getUserProfile, updateProfile, changePassword } = require('../controllers/authController');
 const verifyToken = require("../middleware/verifyToken");
 
 router.post('/register', register);
 router.post('/login', login);
+router.post('/google-login', googleLogin);
 router.post('/logout', logout);
 
 // Protected routes - require authentication

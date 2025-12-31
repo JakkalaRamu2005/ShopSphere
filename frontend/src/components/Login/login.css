@@ -219,6 +219,42 @@ body {
   }
 }
 
+/* Google Login & Divider */
+.login-divider {
+  margin: 1.5rem 0;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: #adb5bd;
+}
+
+.login-divider::before,
+.login-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.login-divider span {
+  padding: 0 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.google-login-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+/* Ensure Google button takes full width if possible */
+.google-login-wrapper>div {
+  width: 100% !important;
+}
+
 /* Extra Small Screens */
 @media (max-width: 360px) {
   .login-container {

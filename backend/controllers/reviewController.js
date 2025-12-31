@@ -6,44 +6,31 @@ const addReview = async (req, res) => {
         const { productId, rating, reviewText } = req.body;
         const userId = req.user.id;
 
-        // Validate rating
-        if (!rating || rating < 1 || rating > 5) {
+        // Rating is now optional
+        const processedRating = rating || 0;
+
+        // At least rating or comment must be provided
+        if (processedRating === 0 && (!reviewText || !reviewText.trim())) {
             return res.status(400).json({
                 success: false,
-                message: 'Rating must be between 1 and 5'
+                message: 'Please provide either a rating or a comment'
             });
         }
 
-        // Check if user already reviewed this product
-        const [existingReview] = await db.query(
-            'SELECT id FROM reviews WHERE user_id = ? AND product_id = ?',
-            [userId, productId]
-        );
-
-        if (existingReview.length > 0) {
-            return res.status(400).json({
-                success: false,
-                message: 'You have already reviewed this product'
-            });
-        }
-
-        // Insert new review
+        // Insert new review (multiple reviews allowed now)
         const [result] = await db.query(
             'INSERT INTO reviews (user_id, product_id, rating, review_text) VALUES (?, ?, ?, ?)',
-            [userId, productId, rating, reviewText || null]
+            [userId, productId, processedRating, reviewText || null]
         );
 
         res.status(201).json({
             success: true,
-            message: 'Review added successfully',
+            message: 'Feedback added successfully',
             reviewId: result.insertId
         });
     } catch (error) {
         console.error('Error adding review:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to add review'
-        });
+        res.status(500).json({ status: 500, success: false, message: 'Internal server error' });
     }
 };
 
@@ -55,6 +42,7 @@ const getProductReviews = async (req, res) => {
         const [reviews] = await db.query(
             `SELECT 
                 r.id,
+                r.user_id,
                 r.rating,
                 r.review_text,
                 r.created_at,
@@ -86,7 +74,7 @@ const getProductRating = async (req, res) => {
 
         const [result] = await db.query(
             `SELECT 
-                COALESCE(AVG(rating), 0) as average_rating,
+                COALESCE(AVG(NULLIF(rating, 0)), 0) as average_rating,
                 COUNT(*) as total_reviews
             FROM reviews
             WHERE product_id = ?`,
@@ -107,20 +95,11 @@ const getProductRating = async (req, res) => {
     }
 };
 
-// Update a review
 const updateReview = async (req, res) => {
     try {
         const { reviewId } = req.params;
         const { rating, reviewText } = req.body;
         const userId = req.user.id;
-
-        // Validate rating
-        if (rating && (rating < 1 || rating > 5)) {
-            return res.status(400).json({
-                success: false,
-                message: 'Rating must be between 1 and 5'
-            });
-        }
 
         // Check if review belongs to user
         const [review] = await db.query(
@@ -131,25 +110,27 @@ const updateReview = async (req, res) => {
         if (review.length === 0) {
             return res.status(404).json({
                 success: false,
-                message: 'Review not found or unauthorized'
+                message: 'Feedback not found or unauthorized'
             });
         }
+
+        const processedRating = rating || 0;
 
         // Update review
         await db.query(
             'UPDATE reviews SET rating = ?, review_text = ? WHERE id = ?',
-            [rating, reviewText || null, reviewId]
+            [processedRating, reviewText || null, reviewId]
         );
 
         res.json({
             success: true,
-            message: 'Review updated successfully'
+            message: 'Feedback updated successfully'
         });
     } catch (error) {
         console.error('Error updating review:', error);
         res.status(500).json({
             success: false,
-            message: 'Failed to update review'
+            message: 'Failed to update feedback'
         });
     }
 };

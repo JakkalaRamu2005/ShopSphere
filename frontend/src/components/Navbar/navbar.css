@@ -76,9 +76,13 @@
   display: flex;
   align-items: center;
   background: white;
-  border-radius: 2px;
+  border-radius: 12px;
+  /* More rounded as requested */
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  /* Slightly deeper shadow */
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  /* Soft border */
 }
 
 .navbar-search-input {
@@ -500,9 +504,11 @@
 /* Mobile Responsiveness (Max 768px) */
 @media (max-width: 768px) {
   .nav-container {
-    padding: 0.75rem 1rem;
-    gap: 0.75rem;
+    padding: 0.8rem 1.25rem;
+    gap: 0.5rem;
     flex-wrap: wrap;
+    align-items: center;
+    /* Ensure vertical centering */
   }
 
   /* Brand stays on top left */
@@ -519,10 +525,12 @@
   .navbar-search-container {
     order: 3;
     width: 100%;
-    margin: 0.5rem 0 0;
+    margin: 1rem 0 0.5rem;
+    /* Increased top margin for proper spacing */
     max-width: 100%;
     flex: 0 0 100%;
-    /* Force full width on new line */
+    padding: 0 0.25rem;
+    /* Added slight side padding */
   }
 
   .navbar-search-input {

@@ -3,6 +3,8 @@ import { useAuth } from "../AuthContext";
 import "./login.css";
 // import axios from "axios";
 import { useNavigate, Link, Navigate } from "react-router";
+import { GoogleLogin } from "@react-oauth/google";
+import { API_BASE_URL } from "../../config/api";
 
 
 function Login() {
@@ -27,8 +29,35 @@ function Login() {
     } else {
       setMsg(result.message);
     }
-
   }
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      setMsg("");
+      const response = await fetch(`${API_BASE_URL}/auth/google-login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credential: credentialResponse.credential }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.token) {
+        localStorage.setItem('token', data.token);
+        setIsLoggedIn(true);
+        navigate("/");
+      } else {
+        setMsg(data.message || "Google login failed");
+      }
+    } catch (err) {
+      console.error("Google login error:", err);
+      setMsg("An error occurred during Google login");
+    }
+  };
+
+  const handleGoogleError = () => {
+    setMsg("Google login was unsuccessful. Try again.");
+  };
   return (
 
     <div className="login-container">
@@ -60,6 +89,21 @@ function Login() {
 
         <button type="submit">Login</button>
         {msg && <p className="message">{msg}</p>}
+
+        <div className="login-divider">
+          <span>OR</span>
+        </div>
+
+        <div className="google-login-wrapper">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+            useOneTap
+            theme="filled_blue"
+            shape="pill"
+            width="100%"
+          />
+        </div>
         <p className="redirect-text">
           Don't have an account? <Link to="/register">Register now</Link>
         </p>

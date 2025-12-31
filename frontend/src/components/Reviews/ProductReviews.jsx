@@ -44,37 +44,25 @@ function ProductReviews({ productId }) {
         <div className="product-reviews-section">
             {user ? (
                 <div className="review-action-section">
-                    {!hasReviewed ? (
-                        <>
-                            {!showForm ? (
-                                <button
-                                    className="write-review-btn"
-                                    onClick={() => setShowForm(true)}
-                                >
-                                    ✍️ Write a Review
-                                </button>
-                            ) : (
-                                <div className="review-form-wrapper">
-                                    <button
-                                        className="cancel-review-btn"
-                                        onClick={() => setShowForm(false)}
-                                    >
-                                        ✕ Cancel
-                                    </button>
-                                    <ReviewForm
-                                        productId={productId}
-                                        onReviewSubmitted={handleReviewSubmitted}
-                                    />
-                                </div>
-                            )}
-                        </>
+                    {!showForm ? (
+                        <button
+                            className="write-review-btn"
+                            onClick={() => setShowForm(true)}
+                        >
+                            ✍️ Post a Comment
+                        </button>
                     ) : (
-                        <div className="already-reviewed-notice">
-                            <div className="notice-icon">✓</div>
-                            <div className="notice-content">
-                                <h4>You've already reviewed this product</h4>
-                                <p>Thank you for your feedback!</p>
-                            </div>
+                        <div className="review-form-wrapper">
+                            <button
+                                className="cancel-review-btn"
+                                onClick={() => setShowForm(false)}
+                            >
+                                ✕ Close
+                            </button>
+                            <ReviewForm
+                                productId={productId}
+                                onReviewSubmitted={handleReviewSubmitted}
+                            />
                         </div>
                     )}
                 </div>

@@ -149,7 +149,7 @@ function AdminProducts() {
                 <button onClick={handleAddNew} className="add-btn">+ Add Product</button>
             </div>
 
-            <div className="products-table-container">
+            <div className="products-table-container desktop-view">
                 <table className="admin-table">
                     <thead>
                         <tr>
@@ -181,6 +181,39 @@ function AdminProducts() {
                         ))}
                     </tbody>
                 </table>
+            </div>
+
+            {/* Mobile View Cards */}
+            <div className="products-mobile-grid mobile-view">
+                {products.map((product) => (
+                    <div key={product.id} className="product-mobile-card">
+                        <div className="card-top">
+                            <img src={product.image} alt={product.title} className="mobile-product-img" />
+                            <div className="card-info">
+                                <h3>{product.title}</h3>
+                                <p className="category-badge">{product.category}</p>
+                            </div>
+                        </div>
+                        <div className="card-details">
+                            <div className="detail-item">
+                                <span className="label">Price:</span>
+                                <span className="value">₹{parseFloat(product.price).toFixed(2)}</span>
+                            </div>
+                            <div className="detail-item">
+                                <span className="label">Stock:</span>
+                                <span className="value">{product.stock}</span>
+                            </div>
+                            <div className="detail-item">
+                                <span className="label">ID:</span>
+                                <span className="value">#{product.id}</span>
+                            </div>
+                        </div>
+                        <div className="product-card-actions">
+                            <button onClick={() => handleEdit(product)} className="edit-btn">Edit</button>
+                            <button onClick={() => handleDelete(product.id)} className="delete-btn">Delete</button>
+                        </div>
+                    </div>
+                ))}
             </div>
 
             {showModal && (
@@ -235,12 +268,17 @@ function AdminProducts() {
 
                             <div className="form-group">
                                 <label>Category</label>
-                                <input
-                                    type="text"
+                                <select
                                     name="category"
                                     value={formData.category}
                                     onChange={handleInputChange}
-                                />
+                                    className="form-control"
+                                >
+                                    <option value="">Select Category</option>
+                                    {[...new Set(products.map(p => p.category))].filter(Boolean).sort().map(cat => (
+                                        <option key={cat} value={cat}>{cat}</option>
+                                    ))}
+                                </select>
                             </div>
 
                             <div className="form-group">

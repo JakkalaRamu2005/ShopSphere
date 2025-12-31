@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { API_BASE_URL } from "../../config/api";
 import { useAuth } from "../AuthContext";
 import AddressManagement from "./AddressManagement";
@@ -11,8 +11,8 @@ import "./userprofile.css";
  * Features: View profile, edit name/email, change password
  */
 function UserProfile() {
-    const { updateUser } = useAuth();
-    const [user, setUser] = useState(null);
+    const { user: authUser, updateUser } = useAuth();
+    const [user, setUser] = useState(authUser);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
@@ -31,6 +31,17 @@ function UserProfile() {
         newPassword: "",
         confirmPassword: ""
     });
+
+    // Sync with auth context if authUser changes
+    useEffect(() => {
+        if (authUser) {
+            setUser(authUser);
+            setProfileForm({
+                name: authUser.name || "",
+                email: authUser.email || ""
+            });
+        }
+    }, [authUser]);
 
     // Fetch user profile on mount
     useEffect(() => {
@@ -428,28 +439,40 @@ function UserProfile() {
                     <div className="card-header">
                         <h2>Quick Actions</h2>
                     </div>
-                    <div className="quick-actions">
-                        <button
-                            onClick={() => navigate("/orders")}
-                            className="action-btn"
-                        >
-                            <span className="action-icon">📦</span>
-                            <span className="action-text">View Orders</span>
-                        </button>
-                        <button
-                            onClick={() => navigate("/cart")}
-                            className="action-btn"
-                        >
-                            <span className="action-icon">🛒</span>
-                            <span className="action-text">View Cart</span>
-                        </button>
-                        <button
-                            onClick={() => navigate("/products")}
-                            className="action-btn"
-                        >
-                            <span className="action-icon">🛍️</span>
-                            <span className="action-text">Browse Products</span>
-                        </button>
+                    <div className="quick-actions-grid">
+                        <Link to="/orders" className="action-card-item">
+                            <span className="action-icon-box">📦</span>
+                            <div className="action-details">
+                                <span className="action-label">My Orders</span>
+                                <span className="action-subtext">Track your purchases</span>
+                            </div>
+                        </Link>
+
+                        <Link to="/cart" className="action-card-item">
+                            <span className="action-icon-box">🛒</span>
+                            <div className="action-details">
+                                <span className="action-label">My Cart</span>
+                                <span className="action-subtext">View saved items</span>
+                            </div>
+                        </Link>
+
+                        <Link to="/products" className="action-card-item">
+                            <span className="action-icon-box">🛍️</span>
+                            <div className="action-details">
+                                <span className="action-label">Shop Now</span>
+                                <span className="action-subtext">Browse our store</span>
+                            </div>
+                        </Link>
+
+                        {(user?.role === 'admin' || authUser?.role === 'admin') && (
+                            <Link to="/admin" className="action-card-item admin-highlight">
+                                <span className="action-icon-box">⚙️</span>
+                                <div className="action-details">
+                                    <span className="action-label">Admin Panel</span>
+                                    <span className="action-subtext">Manage store</span>
+                                </div>
+                            </Link>
+                        )}
                     </div>
                 </div>
 

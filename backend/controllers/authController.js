@@ -2,10 +2,13 @@
 const db = require('../db');
 const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
+const { OAuth2Client } = require('google-auth-library');
 const { sendWelcomeEmail } = require('../services/emailService');
 
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
 async function findUserByEmail(email) {
-    const [rows] = await db.execute('SELECT * FROM users WHERE email = ?', [email]);
+    const [rows] = await db.execute('SELECT id, name, email, password, role, status, google_id FROM users WHERE email = ?', [email]);
     return rows[0];
 }
 
@@ -65,7 +68,7 @@ exports.login = async (request, response) => {
         }
 
         const token = jwt.sign(
-            { id: user.id, email: user.email },
+            { id: user.id, email: user.email, role: user.role },
             process.env.JWT_SECRET,
             { expiresIn: process.env.JWT_EXPIRES_IN }
         )
@@ -86,7 +89,8 @@ exports.login = async (request, response) => {
             user: {
                 id: user.id,
                 email: user.email,
-                name: user.name
+                name: user.name,
+                role: user.role
             }
         });
 
@@ -97,6 +101,79 @@ exports.login = async (request, response) => {
 
 };
 
+exports.googleLogin = async (request, response) => {
+    try {
+        const { credential } = request.body;
+
+        if (!credential) {
+            return response.status(400).json({ message: "Google credential is required" });
+        }
+
+        // Verify Google Token
+        const ticket = await googleClient.verifyIdToken({
+            idToken: credential,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+
+        const payload = ticket.getPayload();
+        const { email, name, sub: googleId, picture } = payload;
+
+        let user = await findUserByEmail(email);
+
+        if (!user) {
+            // Create new user if they don't exist
+            await db.execute(
+                'INSERT INTO users (name, email, google_id, profile_pic) VALUES (?, ?, ?, ?)',
+                [name, email, googleId, picture]
+            );
+            user = await findUserByEmail(email);
+
+            // Send welcome email
+            sendWelcomeEmail(email, name).catch(err => console.error('Welcome email error:', err));
+        } else if (!user.google_id) {
+            // Link Google account to existing email if not linked
+            await db.execute(
+                'UPDATE users SET google_id = ?, profile_pic = ? WHERE id = ?',
+                [googleId, picture, user.id]
+            );
+        }
+
+        if (user.status === 'blocked') {
+            return response.status(403).json({ message: "Your account has been blocked" });
+        }
+
+        // Generate JWT
+        const token = jwt.sign(
+            { id: user.id, email: user.email, role: user.role },
+            process.env.JWT_SECRET,
+            { expiresIn: process.env.JWT_EXPIRES_IN }
+        );
+
+        response.cookie('token', token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'None',
+            maxAge: 24 * 60 * 60 * 1000
+        });
+
+        return response.status(200).json({
+            success: true,
+            message: "Google login successful",
+            token: token,
+            user: {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                role: user.role,
+                profilePic: picture
+            }
+        });
+
+    } catch (error) {
+        console.error('Google login error:', error);
+        return response.status(500).json({ message: "Google authentication failed" });
+    }
+};
 
 exports.logout = (request, response) => {
     response.clearCookie('token');

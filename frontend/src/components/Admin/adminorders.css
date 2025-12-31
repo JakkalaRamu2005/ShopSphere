@@ -36,6 +36,7 @@
     font-size: 1.2rem;
     margin: 0;
 }
+
 /* Toast Notification */
 .toast {
     position: fixed;
@@ -55,6 +56,7 @@
         transform: translateX(400px);
         opacity: 0;
     }
+
     to {
         transform: translateX(0);
         opacity: 1;
@@ -69,4 +71,111 @@
 .toast-error {
     background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
     color: white;
+}
+
+/* View Toggling */
+.mobile-view {
+    display: none;
+}
+
+.desktop-view {
+    display: block;
+}
+
+/* Mobile Responsive Grid */
+.orders-mobile-grid {
+    display: grid;
+    gap: 1.25rem;
+    padding-bottom: 2rem;
+}
+
+.order-mobile-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.25rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    border: 1px solid #edf2f7;
+}
+
+.order-mobile-card .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #f0f4f8;
+}
+
+.order-id {
+    font-weight: 700;
+    color: #4a5568;
+    font-size: 1.1rem;
+}
+
+.card-info {
+    margin-bottom: 1rem;
+}
+
+.customer-name {
+    margin: 0;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.customer-email {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #718096;
+}
+
+.card-details {
+    background: #f8fafc;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #4a5568;
+}
+
+.order-amount {
+    color: #1a202c;
+    font-size: 1.1rem;
+}
+
+.order-date {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #a0aec0;
+}
+
+.order-card-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.order-card-actions label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #718096;
+}
+
+.order-card-actions .status-select {
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .mobile-view {
+        display: grid;
+    }
+
+    .desktop-view {
+        display: none;
+    }
 }

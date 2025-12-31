@@ -1,13 +1,22 @@
 const nodemailer = require('nodemailer');
 
 // Create transporter
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD
+let transporter;
+try {
+    if (process.env.EMAIL_USER && (process.env.EMAIL_PASSWORD || process.env.EMAIL_PASS)) {
+        transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASSWORD || process.env.EMAIL_PASS
+            }
+        });
+    } else {
+        console.warn('Email service: Credentials missing. Emails will not be sent.');
     }
-});
+} catch (error) {
+    console.error('Email service initialization error:', error);
+}
 
 // Email templates
 const emailTemplates = {
@@ -163,6 +172,10 @@ const sendEmail = async (to, template) => {
             html: template.html
         };
 
+        if (!transporter) {
+            console.warn('Skipping email send: Transporter not configured');
+            return { success: false, error: 'Transporter not configured' };
+        }
         const info = await transporter.sendMail(mailOptions);
         console.log('Email sent:', info.messageId);
         return { success: true, messageId: info.messageId };

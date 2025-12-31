@@ -3,6 +3,9 @@ import { createRoot } from 'react-dom/client'
 import App from './App.jsx'
 import './global.css'
 import { API_BASE_URL } from './config/api'
+import { GoogleOAuthProvider } from '@react-oauth/google'
+
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 // Add global fetch interceptor to handle authentication headers
 const originalFetch = window.fetch;
@@ -40,6 +43,8 @@ window.fetch = async (...args) => {
 
 createRoot(document.getElementById('root')).render(
     <StrictMode>
-        <App />
+        <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+            <App />
+        </GoogleOAuthProvider>
     </StrictMode>
 )

@@ -105,7 +105,7 @@ function AdminOrders() {
                 <h1>Order Management</h1>
             </div>
 
-            <div className="orders-table-container">
+            <div className="orders-table-container desktop-view">
                 <table className="admin-table">
                     <thead>
                         <tr>
@@ -150,13 +150,52 @@ function AdminOrders() {
                         ))}
                     </tbody>
                 </table>
-
-                {orders.length === 0 && (
-                    <div className="no-data">
-                        <p>No orders found</p>
-                    </div>
-                )}
             </div>
+
+            {/* Mobile View Cards */}
+            <div className="orders-mobile-grid mobile-view">
+                {orders.map((order) => (
+                    <div key={order.id} className="order-mobile-card">
+                        <div className="card-top">
+                            <div className="order-id">#{order.id}</div>
+                            <span className={`status-badge ${order.order_status}`}>
+                                {order.order_status}
+                            </span>
+                        </div>
+                        <div className="card-info">
+                            <p className="customer-name">{order.user_name}</p>
+                            <p className="customer-email">{order.user_email}</p>
+                        </div>
+                        <div className="card-details">
+                            <div className="detail-row">
+                                <span>Items: {order.item_count}</span>
+                                <span className="order-amount">{formatCurrency(order.total_amount)}</span>
+                            </div>
+                            <p className="order-date">{formatDate(order.created_at)}</p>
+                        </div>
+                        <div className="order-card-actions">
+                            <label>Update Status:</label>
+                            <select
+                                value={order.order_status}
+                                onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                                className="status-select"
+                            >
+                                <option value="pending">Pending</option>
+                                <option value="processing">Processing</option>
+                                <option value="shipped">Shipped</option>
+                                <option value="delivered">Delivered</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {orders.length === 0 && !loading && (
+                <div className="no-data">
+                    <p>No orders found</p>
+                </div>
+            )}
         </div>
     );
 }
