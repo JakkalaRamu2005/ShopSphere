@@ -5,7 +5,7 @@
 /* Page Container */
 .products-page {
   min-height: calc(100vh - 80px);
-  padding-top: 90px;
+  padding-top: 85px;
   /* Account for fixed Navbar */
   background-color: var(--light-gray);
   animation: fadeIn 0.4s ease-out;
@@ -88,9 +88,6 @@
   background: white;
   padding: 2rem 2rem 1.5rem;
   box-shadow: var(--shadow-sm);
-  position: sticky;
-  top: 85px;
-  z-index: 100;
 }
 
 .products-heading {
@@ -98,7 +95,7 @@
   font-weight: 700;
   color: var(--dark-gray);
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0;
   background: linear-gradient(135deg, var(--primary-color) 0%, #764ba2 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -428,7 +425,7 @@
   margin: 0 auto;
 }
 
-/* Filters Sidebar */
+/* Filters Sidebar - Sticky */
 .filters-sidebar {
   background: white;
   border-radius: 12px;
@@ -436,7 +433,25 @@
   box-shadow: var(--shadow-sm);
   height: fit-content;
   position: sticky;
-  top: 180px;
+  top: 100px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-color) var(--light-gray);
+}
+
+.filters-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.filters-sidebar::-webkit-scrollbar-track {
+  background: var(--light-gray);
+  border-radius: 10px;
+}
+
+.filters-sidebar::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 10px;
 }
 
 /* Responsive Layout */
@@ -693,11 +708,23 @@
   font-size: 1rem;
 }
 
-/* Products Grid */
+/* Products Grid - Increased Density (4-5 items per row) */
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.2rem;
+}
+
+@media (min-width: 1200px) {
+  .products-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 1400px) {
+  .products-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
 }
 
 /* ==================== ENHANCED PRODUCT CARD ==================== */
@@ -1284,6 +1311,19 @@
   color: var(--text-gray);
   margin-top: 1rem;
   font-weight: 500;
+}
+
+/* Pagination Ellipsis */
+.page-ellipsis {
+  min-width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray-400);
+  font-size: 1.2rem;
+  font-weight: 600;
+  user-select: none;
 }
 
 /* Tablet Responsiveness */

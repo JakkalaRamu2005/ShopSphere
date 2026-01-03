@@ -43,10 +43,34 @@ const getAllProducts = async (req, res) => {
 
         const [products] = await db.query(query, params);
 
+        // Parse images if they are strings (ensure they are always arrays)
+        const productsWithImages = products.map(product => {
+            let images = [];
+            if (product.images) {
+                // Debug: Log the type and value of images
+                console.log(`Product ${product.id} - images type:`, typeof product.images);
+                console.log(`Product ${product.id} - images value:`, product.images);
+
+                try {
+                    images = typeof product.images === 'string' ? JSON.parse(product.images) : product.images;
+                } catch (e) {
+                    console.error('Error parsing images JSON for product', product.id, e);
+                    // Fallback to treating as single string or empty
+                    images = typeof product.images === 'string' ? [product.images] : [];
+                }
+
+                console.log(`Product ${product.id} - parsed images:`, images);
+            }
+            return {
+                ...product,
+                images: Array.isArray(images) ? images : []
+            };
+        });
+
         res.status(200).json({
             success: true,
-            count: products.length,
-            products
+            count: productsWithImages.length,
+            products: productsWithImages
         });
     } catch (error) {
         console.error('Error fetching products:', error);
@@ -75,9 +99,20 @@ const getProductById = async (req, res) => {
             });
         }
 
+        const product = products[0];
+        let images = [];
+        if (product.images) {
+            try {
+                images = typeof product.images === 'string' ? JSON.parse(product.images) : product.images;
+            } catch (e) {
+                images = [];
+            }
+        }
+        product.images = Array.isArray(images) ? images : [];
+
         res.status(200).json({
             success: true,
-            product: products[0]
+            product: product
         });
     } catch (error) {
         console.error('Error fetching product:', error);
@@ -99,11 +134,21 @@ const getProductsByCategory = async (req, res) => {
             [category]
         );
 
+        const productsWithImages = products.map(product => {
+            let images = [];
+            if (product.images) {
+                try {
+                    images = typeof product.images === 'string' ? JSON.parse(product.images) : product.images;
+                } catch (e) { images = []; }
+            }
+            return { ...product, images: Array.isArray(images) ? images : [] };
+        });
+
         res.status(200).json({
             success: true,
-            count: products.length,
+            count: productsWithImages.length,
             category,
-            products
+            products: productsWithImages
         });
     } catch (error) {
         console.error('Error fetching products by category:', error);
@@ -155,11 +200,21 @@ const searchProducts = async (req, res) => {
             [searchTerm, searchTerm, searchTerm]
         );
 
+        const productsWithImages = products.map(product => {
+            let images = [];
+            if (product.images) {
+                try {
+                    images = typeof product.images === 'string' ? JSON.parse(product.images) : product.images;
+                } catch (e) { images = []; }
+            }
+            return { ...product, images: Array.isArray(images) ? images : [] };
+        });
+
         res.status(200).json({
             success: true,
-            count: products.length,
+            count: productsWithImages.length,
             searchQuery: q,
-            products
+            products: productsWithImages
         });
     } catch (error) {
         console.error('Error searching products:', error);
@@ -181,10 +236,20 @@ const getFeaturedProducts = async (req, res) => {
             [limit]
         );
 
+        const productsWithImages = products.map(product => {
+            let images = [];
+            if (product.images) {
+                try {
+                    images = typeof product.images === 'string' ? JSON.parse(product.images) : product.images;
+                } catch (e) { images = []; }
+            }
+            return { ...product, images: Array.isArray(images) ? images : [] };
+        });
+
         res.status(200).json({
             success: true,
-            count: products.length,
-            products
+            count: productsWithImages.length,
+            products: productsWithImages
         });
     } catch (error) {
         console.error('Error fetching featured products:', error);

@@ -97,6 +97,12 @@
   word-wrap: break-word;
 }
 
+/* Deals Section Styles */
+.deals-section {
+  margin: 3rem auto;
+  padding: 0 2rem;
+}
+
 /* Categories Section */
 .categories-section {
   padding: 3rem 2rem;
@@ -344,8 +350,23 @@
 }
 
 .trust-icon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, var(--primary-color) 0%, #764ba2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  color: white;
+  font-size: 2rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.trust-item:hover .trust-icon {
+  transform: translateY(-5px) scale(1.1);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
 }
 
 .trust-item h3 {

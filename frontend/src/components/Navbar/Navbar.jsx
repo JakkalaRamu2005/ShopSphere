@@ -1,8 +1,8 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { FaShoppingCart, FaBars, FaTimes, FaUser, FaBox, FaUserEdit, FaSignOutAlt, FaHeart, FaShoppingBag } from 'react-icons/fa';
-import { useAuth } from "../AuthContext";
-import { useCart } from "../CartContext";
-import { useWishlist } from "../WishlistContext";
+import { useAuth } from "../../context/AuthContext";
+import { useCart } from "../../context/CartContext";
+import { useWishlist } from "../../context/WishlistContext";
 import API_URL from "../../config/api";
 import { useState, useRef, useEffect } from "react";
 import "./navbar.css";
@@ -176,6 +176,51 @@ function Navbar() {
           <span className="brand-text">ShopSphere</span>
         </Link>
 
+        {/* Categories Dropdown */}
+        <div className="categories-dropdown-container">
+          <button
+            className="categories-dropdown-btn"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            <FaBars size={16} />
+            <span>Categories</span>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+              <path d="M6 9L1 4h10z" />
+            </svg>
+          </button>
+
+          {isMobileMenuOpen && (
+            <div className="categories-mega-menu">
+              <div className="mega-menu-content">
+                <div className="category-column">
+                  <h4>Fashion</h4>
+                  <Link to="/products?category=men's clothing" onClick={handleLinkClick}>Men's Clothing</Link>
+                  <Link to="/products?category=women's clothing" onClick={handleLinkClick}>Women's Clothing</Link>
+                  <Link to="/products?category=jewelry" onClick={handleLinkClick}>Jewelry</Link>
+                </div>
+                <div className="category-column">
+                  <h4>Electronics</h4>
+                  <Link to="/products?category=electronics" onClick={handleLinkClick}>All Electronics</Link>
+                  <Link to="/products?category=laptops" onClick={handleLinkClick}>Laptops</Link>
+                  <Link to="/products?category=mobiles" onClick={handleLinkClick}>Mobiles</Link>
+                </div>
+                <div className="category-column">
+                  <h4>Accessories</h4>
+                  <Link to="/products?category=accessories" onClick={handleLinkClick}>All Accessories</Link>
+                  <Link to="/products?category=bags" onClick={handleLinkClick}>Bags</Link>
+                  <Link to="/products?category=watches" onClick={handleLinkClick}>Watches</Link>
+                </div>
+                <div className="category-column">
+                  <h4>More</h4>
+                  <Link to="/products" onClick={handleLinkClick}>View All Products</Link>
+                  <Link to="/products?sort=newest" onClick={handleLinkClick}>New Arrivals</Link>
+                  <Link to="/products?sort=rating" onClick={handleLinkClick}>Best Sellers</Link>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Integrated Search Bar with Autocomplete */}
         <div className="navbar-search-container" ref={searchRef}>
           <form onSubmit={handleSearchSubmit} className="navbar-search-wrapper">
@@ -212,7 +257,7 @@ function Navbar() {
                   onMouseEnter={() => setSelectedIndex(index)}
                 >
                   <img
-                    src={product.image || '/placeholder-product.png'}
+                    src={product.images?.[0] || '/placeholder-product.png'}
                     alt={product.title}
                     className="suggestion-image"
                   />
@@ -247,6 +292,17 @@ function Navbar() {
         <div className="nav-actions">
           {isLoggedIn ? (
             <>
+              {/* Wishlist Icon with Badge */}
+              <Link to="/wishlist" className="wishlist-link" onClick={handleLinkClick}>
+                <div className="wishlist-icon-wrapper">
+                  <FaHeart size={22} />
+                  {wishlistCount > 0 && (
+                    <span className="wishlist-badge">{wishlistCount}</span>
+                  )}
+                </div>
+                <span className="wishlist-text">Wishlist</span>
+              </Link>
+
               {/* Cart Icon with Badge */}
               <Link to="/cart" className="cart-link" onClick={handleLinkClick}>
                 <div className="cart-icon-wrapper">

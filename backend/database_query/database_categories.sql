@@ -1,7 +1,7 @@
 -- ============================================
 -- CATEGORIES TABLE SETUP
 -- ============================================
--- This script creates the categories table and inserts FakeStore API categories
+-- This script creates the categories table and inserts API categories
 
 -- ============================================
 -- 1. CREATE CATEGORIES TABLE
@@ -18,17 +18,35 @@ CREATE TABLE IF NOT EXISTS categories (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================
--- 2. INSERT FAKESTORE API CATEGORIES
+-- 2. INSERT API CATEGORIES
 -- ============================================
--- These are the 4 main categories from FakeStore API
 INSERT INTO categories (name, item_count, description) VALUES
-('electronics', 6, 'Electronic devices, gadgets, and accessories'),
-('jewelery', 4, 'Jewelry items including rings, necklaces, and bracelets'),
-('men''s clothing', 8, 'Clothing and fashion items for men'),
-('women''s clothing', 7, 'Clothing and fashion items for women')
+('beauty', 5, 'Beauty products'),
+('fragrances', 5, 'Fragrances products'),
+('furniture', 5, 'Furniture products'),
+('groceries', 27, 'Groceries products'),
+('home-decoration', 5, 'Home Decoration products'),
+('kitchen-accessories', 30, 'Kitchen Accessories products'),
+('laptops', 5, 'Laptops products'),
+('mens-shirts', 5, 'Mens Shirts products'),
+('mens-shoes', 5, 'Mens Shoes products'),
+('mens-watches', 6, 'Mens Watches products'),
+('mobile-accessories', 14, 'Mobile Accessories products'),
+('motorcycle', 5, 'Motorcycle products'),
+('skin-care', 3, 'Skin Care products'),
+('smartphones', 16, 'Smartphones products'),
+('sports-accessories', 17, 'Sports Accessories products'),
+('sunglasses', 5, 'Sunglasses products'),
+('tablets', 3, 'Tablets products'),
+('tops', 5, 'Tops products'),
+('vehicle', 5, 'Vehicle products'),
+('womens-bags', 5, 'Womens Bags products'),
+('womens-dresses', 5, 'Womens Dresses products'),
+('womens-jewellery', 3, 'Womens Jewellery products'),
+('womens-shoes', 5, 'Womens Shoes products'),
+('womens-watches', 5, 'Womens Watches products')
 ON DUPLICATE KEY UPDATE 
-    item_count = VALUES(item_count),
-    description = VALUES(description),
+    item_count = item_count + VALUES(item_count),
     updated_at = CURRENT_TIMESTAMP;
 
 -- ============================================
@@ -39,17 +57,6 @@ ON DUPLICATE KEY UPDATE
 
 -- Count total categories
 -- SELECT COUNT(*) as total_categories FROM categories;
-
--- ============================================
--- 4. UPDATE PRODUCTS TABLE (Optional)
--- ============================================
--- If you want to add a foreign key relationship between products and categories
--- Uncomment the following if needed:
-
--- ALTER TABLE products 
--- ADD COLUMN category_id INT DEFAULT NULL,
--- ADD FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL,
--- ADD INDEX idx_category_id (category_id);
 
 -- ============================================
 -- END OF SCRIPT

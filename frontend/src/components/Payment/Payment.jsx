@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import { API_BASE_URL } from '../../config/api';
 import './payment.css';
 
@@ -60,7 +60,7 @@ function Payment() {
                 key: data.key,
                 amount: data.order.amount,
                 currency: data.order.currency,
-                name: 'ShopEase',
+                name: 'ShopSphere',
                 description: `Order #${orderDetails.orderId}`,
                 order_id: data.order.id,
                 handler: async function (response) {

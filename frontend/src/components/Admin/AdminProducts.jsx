@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import { API_BASE_URL } from '../../config/api';
 import './adminproducts.css';
 
@@ -86,12 +86,16 @@ function AdminProducts() {
 
     const handleEdit = (product) => {
         setEditingProduct(product);
+        // Convert images array to comma-separated string for editing
+        const imageString = product.images && product.images.length > 0
+            ? product.images.join(', ')
+            : '';
         setFormData({
             title: product.title,
             description: product.description || '',
             price: product.price,
             category: product.category || '',
-            image: product.image || '',
+            image: imageString,
             stock: product.stock || 0
         });
         setShowModal(true);
@@ -167,7 +171,12 @@ function AdminProducts() {
                             <tr key={product.id}>
                                 <td>#{product.id}</td>
                                 <td>
-                                    <img src={product.image} alt={product.title} className="product-thumb" />
+                                    <img
+                                        src={product.images && product.images.length > 0 ? product.images[0] : 'https://via.placeholder.com/50x50?text=No+Image'}
+                                        alt={product.title}
+                                        className="product-thumb"
+                                        onError={(e) => { e.target.src = 'https://via.placeholder.com/50x50?text=No+Image'; }}
+                                    />
                                 </td>
                                 <td>{product.title}</td>
                                 <td>₹{parseFloat(product.price).toFixed(2)}</td>
@@ -188,7 +197,12 @@ function AdminProducts() {
                 {products.map((product) => (
                     <div key={product.id} className="product-mobile-card">
                         <div className="card-top">
-                            <img src={product.image} alt={product.title} className="mobile-product-img" />
+                            <img
+                                src={product.images && product.images.length > 0 ? product.images[0] : 'https://via.placeholder.com/100x100?text=No+Image'}
+                                alt={product.title}
+                                className="mobile-product-img"
+                                onError={(e) => { e.target.src = 'https://via.placeholder.com/100x100?text=No+Image'; }}
+                            />
                             <div className="card-info">
                                 <h3>{product.title}</h3>
                                 <p className="category-badge">{product.category}</p>
@@ -282,13 +296,17 @@ function AdminProducts() {
                             </div>
 
                             <div className="form-group">
-                                <label>Image URL</label>
+                                <label>Image URLs (comma-separated for multiple images)</label>
                                 <input
                                     type="text"
                                     name="image"
                                     value={formData.image}
                                     onChange={handleInputChange}
+                                    placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
                                 />
+                                <small style={{ color: '#888', fontSize: '12px', marginTop: '4px', display: 'block' }}>
+                                    Enter one or more image URLs separated by commas
+                                </small>
                             </div>
 
                             <div className="modal-actions">

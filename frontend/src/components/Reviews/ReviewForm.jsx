@@ -6,8 +6,18 @@ import { API_BASE_URL } from '../../config/api';
 function ReviewForm({ productId, onReviewSubmitted, existingReview = null }) {
     const [rating, setRating] = useState(existingReview?.rating || 0);
     const [reviewText, setReviewText] = useState(existingReview?.review_text || '');
+    const [image, setImage] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(existingReview?.review_image || null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState('');
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setImage(file);
+            setPreviewUrl(URL.createObjectURL(file));
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -27,18 +37,20 @@ function ReviewForm({ productId, onReviewSubmitted, existingReview = null }) {
 
             const method = existingReview ? 'PUT' : 'POST';
 
+            const formData = new FormData();
+            formData.append('productId', productId);
+            formData.append('rating', rating);
+            formData.append('reviewText', reviewText.trim() || '');
+            if (image) {
+                formData.append('reviewImage', image);
+            }
+
             const response = await fetch(url, {
                 method,
-                headers: {
-                    'Content-Type': 'application/json'
-                },
                 credentials: 'include',
-                body: JSON.stringify({
-                    productId,
-                    rating,
-                    reviewText: reviewText.trim() || null
-                })
+                body: formData
             });
+
 
             const data = await response.json();
 
@@ -46,8 +58,24 @@ function ReviewForm({ productId, onReviewSubmitted, existingReview = null }) {
                 if (!existingReview) {
                     setRating(0);
                     setReviewText('');
+                    setImage(null);
+                    setPreviewUrl(null);
+                    const fileInput = document.getElementById('review-image-upload');
+                    if (fileInput) fileInput.value = '';
                 }
-                if (onReviewSubmitted) {
+
+                // Show success feedback
+                const btn = document.querySelector('.submit-review-btn');
+                if (btn) {
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '✓ Submitted Successfully!';
+                    btn.classList.add('success-state');
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.classList.remove('success-state');
+                        if (onReviewSubmitted) onReviewSubmitted();
+                    }, 1500);
+                } else if (onReviewSubmitted) {
                     onReviewSubmitted();
                 }
             } else {
@@ -86,6 +114,34 @@ function ReviewForm({ productId, onReviewSubmitted, existingReview = null }) {
                     />
                     <span className="char-count">{reviewText.length}/1000</span>
                 </div>
+
+                <div className="form-group">
+                    <label className="form-label">Add a Photo (Optional)</label>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="review-file-input"
+                        id="review-image-upload"
+                    />
+                    {previewUrl && (
+                        <div className="image-preview-container">
+                            <img src={previewUrl} alt="Review preview" className="review-image-preview" />
+                            <button
+                                type="button"
+                                className="remove-image-btn"
+                                onClick={() => {
+                                    setImage(null);
+                                    setPreviewUrl(null);
+                                    document.getElementById('review-image-upload').value = '';
+                                }}
+                            >
+                                Remove
+                            </button>
+                        </div>
+                    )}
+                </div>
+
 
                 {error && <div className="error-message">{error}</div>}
 

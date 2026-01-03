@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import StarRating from './StarRating';
 import ReviewForm from './ReviewForm';
-import { useAuth } from '../AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import './reviewlist.css';
 import { API_BASE_URL } from '../../config/api';
 
@@ -11,6 +11,7 @@ function ReviewList({ productId }) {
     const [loading, setLoading] = useState(true);
     const [averageRating, setAverageRating] = useState(0);
     const [totalReviews, setTotalReviews] = useState(0);
+    const [ratingDistribution, setRatingDistribution] = useState({});
     const [editingReviewId, setEditingReviewId] = useState(null);
 
     useEffect(() => {
@@ -39,9 +40,11 @@ function ReviewList({ productId }) {
             const data = await response.json();
 
             if (data.success) {
-                setAverageRating(parseFloat(data.averageRating));
-                setTotalReviews(data.totalReviews);
+                setAverageRating(parseFloat(data.averageRating) || 0);
+                setTotalReviews(data.totalReviews || 0);
+                setRatingDistribution(data.distribution || {});
             }
+
         } catch (error) {
             console.error('Error fetching rating:', error);
         }
@@ -98,9 +101,29 @@ function ReviewList({ productId }) {
                     <div className="rating-summary">
                         <div className="average-rating">
                             <span className="rating-number">{averageRating}</span>
-                            <StarRating rating={averageRating} readonly size="medium" />
+                            <div className="rating-stars-info">
+                                <StarRating rating={averageRating} readonly size="medium" />
+                                <p className="total-reviews-text">{totalReviews} {totalReviews === 1 ? 'review' : 'reviews'}</p>
+                            </div>
                         </div>
-                        <p className="total-reviews">Based on {totalReviews} {totalReviews === 1 ? 'review' : 'reviews'}</p>
+                        <div className="rating-bars">
+                            {[5, 4, 3, 2, 1].map((star) => {
+                                const count = ratingDistribution?.[star] || 0;
+                                const percentage = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
+                                return (
+                                    <div key={star} className="rating-bar-item">
+                                        <span className="star-label">{star} ★</span>
+                                        <div className="progress-bar-container">
+                                            <div
+                                                className="progress-bar-fill"
+                                                style={{ width: `${percentage}%` }}
+                                            ></div>
+                                        </div>
+                                        <span className="count-label">{count}</span>
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
                 )}
             </div>
@@ -163,6 +186,16 @@ function ReviewList({ productId }) {
                                     </div>
                                     {review.review_text && (
                                         <p className="review-text">{review.review_text}</p>
+                                    )}
+                                    {review.review_image && (
+                                        <div className="review-image-container">
+                                            <img
+                                                src={review.review_image}
+                                                alt="Customer review photo"
+                                                className="review-image"
+                                                onClick={() => window.open(review.review_image, '_blank')}
+                                            />
+                                        </div>
                                     )}
                                 </>
                             )}

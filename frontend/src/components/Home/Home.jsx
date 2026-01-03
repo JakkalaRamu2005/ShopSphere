@@ -1,7 +1,9 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { FaTruck, FaLock, FaUndo, FaHeadset } from "react-icons/fa";
 import Carousel from "../Carousel/Carousel";
-import Products from "../Products/Products";
+import FeaturedProducts from "../FeaturedProducts/FeaturedProducts";
+import DealsSection from "../DealsSection/DealsSection";
 import "./home.css";
 
 function Home() {
@@ -22,7 +24,7 @@ function Home() {
       description: "Latest gadgets & tech"
     },
     {
-      name: "Jewelery",
+      name: "Jewelry",
       image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=500",
       description: "Elegant jewelry pieces"
     },
@@ -71,29 +73,72 @@ function Home() {
         </div>
       </section>
 
-      {/* All Products Section */}
-      {/* <Products /> */}
+      {/* Deals of the Day Section */}
+      <section className="deals-section">
+        <div className="deals-header">
+          <h2 className="section-title">⚡ Deals of the Day</h2>
+          <div className="deals-timer">
+            <span className="timer-label">Ends in:</span>
+            <div className="timer-display">
+              <div className="timer-unit">
+                <span className="timer-value">12</span>
+                <span className="timer-label-small">Hours</span>
+              </div>
+              <span className="timer-separator">:</span>
+              <div className="timer-unit">
+                <span className="timer-value">34</span>
+                <span className="timer-label-small">Mins</span>
+              </div>
+              <span className="timer-separator">:</span>
+              <div className="timer-unit">
+                <span className="timer-value">56</span>
+                <span className="timer-label-small">Secs</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <DealsSection limit={4} />
+      </section>
+
+      {/* Featured Products Section */}
+      <section className="featured-products-section">
+        <div className="section-header">
+          <h2 className="section-title">Featured Products</h2>
+          <button className="view-all-btn" onClick={handleShopNow}>
+            View All →
+          </button>
+        </div>
+        <FeaturedProducts limit={8} />
+      </section>
 
       {/* Trust Signals Section */}
       <section className="trust-section">
         <div className="trust-grid">
           <div className="trust-item">
-            <div className="trust-icon">🚚</div>
+            <div className="trust-icon">
+              <FaTruck />
+            </div>
             <h3>Free Shipping</h3>
             <p>On orders over ₹500</p>
           </div>
           <div className="trust-item">
-            <div className="trust-icon">🔒</div>
+            <div className="trust-icon">
+              <FaLock />
+            </div>
             <h3>Secure Payment</h3>
             <p>100% secure transactions</p>
           </div>
           <div className="trust-item">
-            <div className="trust-icon">↩️</div>
+            <div className="trust-icon">
+              <FaUndo />
+            </div>
             <h3>Easy Returns</h3>
             <p>30-day return policy</p>
           </div>
           <div className="trust-item">
-            <div className="trust-icon">💬</div>
+            <div className="trust-icon">
+              <FaHeadset />
+            </div>
             <h3>24/7 Support</h3>
             <p>Always here to help</p>
           </div>

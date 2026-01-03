@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import "./products.css";
+import "./breadcrumbs-styles.css";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useCart } from "../CartContext";
-import { useWishlist } from "../WishlistContext";
+import { useCart } from "../../context/CartContext";
+import { useWishlist } from "../../context/WishlistContext";
 import ProductRatingBadge from "./ProductRatingBadge";
 import { API_BASE_URL } from "../../config/api";
 import SkeletonCard from "../Skeleton/SkeletonCard";
@@ -57,7 +58,9 @@ function Products() {
             price: parseFloat(p.price) / 83, // Convert INR to USD for consistency
             description: p.description,
             category: p.category,
-            image: p.image,
+            // Use the first image from the array, or a placeholder if empty
+            image: (p.images && p.images.length > 0) ? p.images[0] : 'https://via.placeholder.com/300x300?text=No+Image',
+            images: p.images || [],
             rating: {
               rate: parseFloat(p.rating_rate) || 0,
               count: parseInt(p.rating_count) || 0
@@ -229,6 +232,44 @@ function Products() {
     }
   };
 
+  // Smart pagination: Generate page numbers to display
+  const getPageNumbers = () => {
+    const pages = [];
+    const totalPages = totalFilteredPages;
+    const current = currentPage;
+
+    if (totalPages <= 7) {
+      // If 7 or fewer pages, show all
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Always show first page
+      pages.push(1);
+
+      if (current > 3) {
+        pages.push('...');
+      }
+
+      // Show pages around current page
+      const startPage = Math.max(2, current - 1);
+      const endPage = Math.min(totalPages - 1, current + 1);
+
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+
+      if (current < totalPages - 2) {
+        pages.push('...');
+      }
+
+      // Always show last page
+      pages.push(totalPages);
+    }
+
+    return pages;
+  };
+
   const handleAddToWishlist = async (e, product) => {
     e.stopPropagation();
     const result = await toggleWishlist(product);
@@ -389,156 +430,18 @@ function Products() {
         </div>
       )}
 
+      {/* Breadcrumbs */}
+      <div className="breadcrumbs-container">
+        <nav className="breadcrumbs">
+          <a href="/" className="breadcrumb-link">Home</a>
+          <span className="breadcrumb-separator">›</span>
+          <span className="breadcrumb-current">Products</span>
+        </nav>
+      </div>
+
       {/* Page Header */}
       <div className="products-header">
         <h1 className="products-heading">All Products</h1>
-
-        {/* Enhanced Search Bar with Suggestions */}
-        <div className="search-container">
-          <div className="search-input-wrapper">
-            <svg className="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="11" cy="11" r="8"></circle>
-              <path d="m21 21-4.35-4.35"></path>
-            </svg>
-
-            <input
-              type="text"
-              placeholder="Search for products, brands and more..."
-              value={searchQuery}
-              onChange={handleSearch}
-              onFocus={() => {
-                if (searchSuggestions.length > 0 || recentSearches.length > 0) {
-                  setShowSuggestions(true);
-                }
-              }}
-              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter') {
-                  handleSearchSubmit(searchQuery);
-                }
-              }}
-              className="search-input"
-            />
-
-            {searchQuery && (
-              <button
-                onClick={() => {
-                  setSearchQuery("");
-                  setShowSuggestions(false);
-                }}
-                className="clear-search-btn"
-              >
-                ✕
-              </button>
-            )}
-
-            {/* Voice Search Button */}
-            <button
-              onClick={handleVoiceSearch}
-              className={`voice-search-btn ${showVoiceSearch ? 'active' : ''}`}
-              title="Voice Search"
-            >
-              {showVoiceSearch ? (
-                <span className="voice-pulse">🎤</span>
-              ) : (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                  <line x1="12" y1="19" x2="12" y2="23"></line>
-                  <line x1="8" y1="23" x2="16" y2="23"></line>
-                </svg>
-              )}
-            </button>
-          </div>
-
-          {/* Enhanced Search Suggestions Dropdown */}
-          {showSuggestions && (
-            <div className="search-suggestions-dropdown">
-              {/* Recent Searches */}
-              {recentSearches.length > 0 && !searchQuery && (
-                <div className="suggestions-section">
-                  <div className="suggestions-header">
-                    <h4>Recent Searches</h4>
-                    <button onClick={clearRecentSearches} className="clear-btn">Clear All</button>
-                  </div>
-                  <div className="recent-searches-list">
-                    {recentSearches.map((search, index) => (
-                      <div
-                        key={index}
-                        className="recent-search-item"
-                        onClick={() => {
-                          setSearchQuery(search);
-                          setCurrentPage(1);
-                        }}
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <circle cx="12" cy="12" r="10"></circle>
-                          <polyline points="12 6 12 12 16 14"></polyline>
-                        </svg>
-                        <span>{search}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Trending Searches */}
-              {!searchQuery && (
-                <div className="suggestions-section">
-                  <div className="suggestions-header">
-                    <h4>Trending Searches</h4>
-                  </div>
-                  <div className="trending-searches-list">
-                    {trendingSearches.map((trend, index) => (
-                      <button
-                        key={index}
-                        className="trending-chip"
-                        onClick={() => handleTrendingClick(trend)}
-                      >
-                        🔥 {trend}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Product Suggestions with Images */}
-              {searchQuery && searchSuggestions.length > 0 && (
-                <div className="suggestions-section">
-                  <div className="suggestions-header">
-                    <h4>Products</h4>
-                  </div>
-                  <div className="product-suggestions-list">
-                    {searchSuggestions.map((product) => (
-                      <div
-                        key={product.id}
-                        className="product-suggestion-item"
-                        onClick={() => handleSuggestionClick(product)}
-                      >
-                        <img src={product.image} alt={product.title} className="suggestion-image" />
-                        <div className="suggestion-details">
-                          <span className="suggestion-title">{product.title}</span>
-                          <div className="suggestion-meta">
-                            <span className="suggestion-category">{product.category}</span>
-                            <span className="suggestion-price">₹{product.price.toFixed(2)}</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* No Results */}
-              {searchQuery && searchSuggestions.length === 0 && (
-                <div className="no-suggestions">
-                  <p>No products found for "{searchQuery}"</p>
-                  <p className="suggestion-hint">Try searching for categories like Electronics, Clothing, or Jewelry</p>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
       </div>
 
       {/* Main Content: Sidebar + Products */}
@@ -670,32 +573,35 @@ function Products() {
             </div>
           </div>
 
-          {/* Sort By */}
-          <div className="filter-section">
-            <h3 className="filter-title">Sort By</h3>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="sort-select"
-            >
-              <option value="default">Default</option>
-              <option value="priceLowToHigh">Price: Low to High</option>
-              <option value="priceHighToLow">Price: High to Low</option>
-              <option value="rating">Highest Rated</option>
-              <option value="newest">Newest First</option>
-            </select>
-          </div>
+
         </aside>
 
         {/* Right Side - Products Grid */}
         <main className="products-content">
-          {/* Results Info */}
-          <div className="results-info">
-            <p>
-              {loading
-                ? "Loading products..."
-                : `Showing ${currentFilteredProducts.length} of ${filteredProducts.length} products`}
-            </p>
+          {/* Products Toolbar - Results Info & Sort */}
+          <div className="products-toolbar">
+            <div className="results-info">
+              <p>
+                {loading
+                  ? "Loading products..."
+                  : `Showing ${currentFilteredProducts.length} of ${filteredProducts.length} products`}
+              </p>
+            </div>
+            <div className="sort-controls">
+              <label htmlFor="sort-select">Sort by:</label>
+              <select
+                id="sort-select"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="sort-select-toolbar"
+              >
+                <option value="default">Relevance</option>
+                <option value="priceLowToHigh">Price: Low to High</option>
+                <option value="priceHighToLow">Price: High to Low</option>
+                <option value="rating">Customer Rating</option>
+                <option value="newest">Newest First</option>
+              </select>
+            </div>
           </div>
 
           {/* Products Grid */}
@@ -860,7 +766,7 @@ function Products() {
                 </div>
               )}
 
-              {/* Pagination */}
+              {/* Smart Pagination */}
               {filteredProducts.length > 0 && totalFilteredPages > 1 && (
                 <>
                   <div className="pagination-container">
@@ -869,17 +775,23 @@ function Products() {
                       disabled={currentPage === 1}
                       className="pagination-btn"
                     >
-                      Previous
+                      ← Previous
                     </button>
                     <div className="page-numbers">
-                      {[...Array(totalFilteredPages)].map((_, index) => (
-                        <button
-                          key={index + 1}
-                          onClick={() => paginate(index + 1)}
-                          className={currentPage === index + 1 ? "page-btn-active" : "page-btn"}
-                        >
-                          {index + 1}
-                        </button>
+                      {getPageNumbers().map((page, index) => (
+                        page === '...' ? (
+                          <span key={`ellipsis-${index}`} className="page-ellipsis">
+                            ...
+                          </span>
+                        ) : (
+                          <button
+                            key={page}
+                            onClick={() => paginate(page)}
+                            className={currentPage === page ? "page-btn-active" : "page-btn"}
+                          >
+                            {page}
+                          </button>
+                        )
                       ))}
                     </div>
                     <button
@@ -887,7 +799,7 @@ function Products() {
                       disabled={currentPage === totalFilteredPages}
                       className="pagination-btn"
                     >
-                      Next
+                      Next →
                     </button>
                   </div>
 

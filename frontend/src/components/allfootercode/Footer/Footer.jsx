@@ -23,7 +23,7 @@ export default function Footer() {
 
         {/* Column 1: Brand + Newsletter */}
         <div className={styles.column}>
-          <h3 className={styles.brand}>ShopEase</h3>
+          <h3 className={styles.brand}>ShopSphere</h3>
           <p className={styles.tagline}>Your trusted online store</p>
 
           <div className={styles.newsletter}>
@@ -136,7 +136,7 @@ export default function Footer() {
 
       {/* Bottom Bar */}
       <div className={styles.bottom}>
-        <p>© {currentYear} ShopEase. All rights reserved. Made with ❤️ in India</p>
+        <p>© {currentYear} ShopSphere. All rights reserved. Made with ❤️ in India</p>
         <div className={styles.bottomLinks}>
           <a href="/privacy">Privacy</a>
           <span>•</span>

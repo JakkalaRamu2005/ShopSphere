@@ -1,12 +1,13 @@
 const db = require('../db');
+const cloudinary = require('../utils/cloudinary');
+const fs = require('fs');
+
 
 // Add a new review
 const addReview = async (req, res) => {
     try {
         const { productId, rating, reviewText } = req.body;
         const userId = req.user.id;
-
-        // Rating is now optional
         const processedRating = rating || 0;
 
         // At least rating or comment must be provided
@@ -17,10 +18,27 @@ const addReview = async (req, res) => {
             });
         }
 
-        // Insert new review (multiple reviews allowed now)
+        let reviewImage = null;
+
+        // Upload image to Cloudinary if exists
+        if (req.file) {
+            try {
+                const result = await cloudinary.uploader.upload(req.file.path, {
+                    folder: 'product_reviews',
+                });
+                reviewImage = result.secure_url;
+                // Remove local file
+                fs.unlinkSync(req.file.path);
+            } catch (err) {
+                console.error('Cloudinary upload error:', err);
+                return res.status(500).json({ success: false, message: 'Image upload failed' });
+            }
+        }
+
+        // Insert new review
         const [result] = await db.query(
-            'INSERT INTO reviews (user_id, product_id, rating, review_text) VALUES (?, ?, ?, ?)',
-            [userId, productId, processedRating, reviewText || null]
+            'INSERT INTO reviews (user_id, product_id, rating, review_text, review_image) VALUES (?, ?, ?, ?, ?)',
+            [userId, productId, processedRating, reviewText || null, reviewImage]
         );
 
         res.status(201).json({
@@ -45,6 +63,7 @@ const getProductReviews = async (req, res) => {
                 r.user_id,
                 r.rating,
                 r.review_text,
+                r.review_image,
                 r.created_at,
                 u.name as user_name
             FROM reviews r
@@ -75,7 +94,12 @@ const getProductRating = async (req, res) => {
         const [result] = await db.query(
             `SELECT 
                 COALESCE(AVG(NULLIF(rating, 0)), 0) as average_rating,
-                COUNT(*) as total_reviews
+                COUNT(*) as total_reviews,
+                COUNT(CASE WHEN rating = 5 THEN 1 END) as count_5,
+                COUNT(CASE WHEN rating = 4 THEN 1 END) as count_4,
+                COUNT(CASE WHEN rating = 3 THEN 1 END) as count_3,
+                COUNT(CASE WHEN rating = 2 THEN 1 END) as count_2,
+                COUNT(CASE WHEN rating = 1 THEN 1 END) as count_1
             FROM reviews
             WHERE product_id = ?`,
             [productId]
@@ -84,7 +108,14 @@ const getProductRating = async (req, res) => {
         res.json({
             success: true,
             averageRating: parseFloat(result[0].average_rating).toFixed(1),
-            totalReviews: result[0].total_reviews
+            totalReviews: result[0].total_reviews,
+            distribution: {
+                5: result[0].count_5,
+                4: result[0].count_4,
+                3: result[0].count_3,
+                2: result[0].count_2,
+                1: result[0].count_1
+            }
         });
     } catch (error) {
         console.error('Error fetching product rating:', error);
@@ -101,7 +132,7 @@ const updateReview = async (req, res) => {
         const { rating, reviewText } = req.body;
         const userId = req.user.id;
 
-        // Check if review belongs to user
+        // Check ownership
         const [review] = await db.query(
             'SELECT id FROM reviews WHERE id = ? AND user_id = ?',
             [reviewId, userId]
@@ -110,17 +141,38 @@ const updateReview = async (req, res) => {
         if (review.length === 0) {
             return res.status(404).json({
                 success: false,
-                message: 'Feedback not found or unauthorized'
+                message: 'Review not found or unauthorized'
             });
         }
 
         const processedRating = rating || 0;
 
+        let reviewImage = null;
+        if (req.file) {
+            try {
+                const result = await cloudinary.uploader.upload(req.file.path, {
+                    folder: 'product_reviews',
+                });
+                reviewImage = result.secure_url;
+                fs.unlinkSync(req.file.path);
+            } catch (err) {
+                console.error('Cloudinary upload error:', err);
+            }
+        }
+
         // Update review
-        await db.query(
-            'UPDATE reviews SET rating = ?, review_text = ? WHERE id = ?',
-            [processedRating, reviewText || null, reviewId]
-        );
+        if (reviewImage) {
+            await db.query(
+                'UPDATE reviews SET rating = ?, review_text = ?, review_image = ? WHERE id = ?',
+                [processedRating, reviewText || null, reviewImage, reviewId]
+            );
+        } else {
+            await db.query(
+                'UPDATE reviews SET rating = ?, review_text = ? WHERE id = ?',
+                [processedRating, reviewText || null, reviewId]
+            );
+        }
+
 
         res.json({
             success: true,
@@ -177,7 +229,7 @@ const checkUserReview = async (req, res) => {
         const userId = req.user.id;
 
         const [review] = await db.query(
-            'SELECT id, rating, review_text FROM reviews WHERE user_id = ? AND product_id = ?',
+            'SELECT id, rating, review_text, review_image FROM reviews WHERE user_id = ? AND product_id = ?',
             [userId, productId]
         );
 

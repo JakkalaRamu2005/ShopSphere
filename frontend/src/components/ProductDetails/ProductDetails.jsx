@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import "./productdetails.css";
-import { useCart } from "../CartContext";
+import { useCart } from "../../context/CartContext";
 import ProductReviews from "../Reviews/ProductReviews";
 import { API_BASE_URL } from "../../config/api";
 
@@ -10,6 +10,7 @@ function ProductDetails() {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [addedToCart, setAddedToCart] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
   const { addToCart } = useCart();
 
   useEffect(() => {
@@ -18,21 +19,25 @@ function ProductDetails() {
       .then((res) => res.json())
       .then((data) => {
         if (data.success && data.product) {
-          // Format product to match expected structure
-          const formattedProduct = {
-            id: data.product.id,
-            title: data.product.title,
-            price: parseFloat(data.product.price) / 83, // Convert INR to USD
-            description: data.product.description,
-            category: data.product.category,
-            image: data.product.image,
+          const p = data.product;
+          // Backend ensures p.images is an array
+          const images = p.images && p.images.length > 0 ? p.images : ['https://via.placeholder.com/300x300?text=No+Image'];
 
+          const formattedProduct = {
+            id: p.id,
+            title: p.title,
+            price: parseFloat(p.price) / 83, // Convert INR to USD
+            description: p.description,
+            category: p.category,
+            images: images,
+            image: images[0], // Main image
             rating: {
-              rate: parseFloat(data.product.rating_rate) || 0,
-              count: parseInt(data.product.rating_count) || 0
+              rate: parseFloat(p.rating_rate) || 0,
+              count: parseInt(p.rating_count) || 0
             }
           };
           setProduct(formattedProduct);
+          setSelectedImage(formattedProduct.image);
         }
         setLoading(false);
       })
@@ -77,8 +82,24 @@ function ProductDetails() {
 
       {/* Image Section */}
       <div className="details-image-container">
+        <div className="main-image-wrapper">
+          <img src={selectedImage || product.image} alt={product.title} className="details-image" />
+        </div>
 
-        <img src={product.image} alt={product.title} className="details-image" />
+        {/* Image Gallery Thumbnails */}
+        {product.images && product.images.length > 1 && (
+          <div className="details-gallery">
+            {product.images.map((img, index) => (
+              <img
+                key={index}
+                src={img}
+                alt={`${product.title} view ${index + 1}`}
+                className={`gallery-thumb ${selectedImage === img ? 'active' : ''}`}
+                onClick={() => setSelectedImage(img)}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Content Section */}

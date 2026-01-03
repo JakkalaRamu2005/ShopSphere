@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import ReviewForm from './ReviewForm';
 import ReviewList from './ReviewList';
 import './productreviews.css';

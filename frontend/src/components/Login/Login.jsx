@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "../AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import "./login.css";
 // import axios from "axios";
 import { useNavigate, Link, Navigate } from "react-router";
@@ -104,6 +104,12 @@ function Login() {
             width="100%"
           />
         </div>
+        <p className="legal-policy-text">
+          By continuing, you agree to ShopSphere's <Link to="/terms">Terms of Use</Link> and <Link to="/privacy">Privacy Policy</Link>.
+        </p>
+        <p className="redirect-text">
+          Want to login with SMS? <Link to="/phone-login">Login with Phone</Link>
+        </p>
         <p className="redirect-text">
           Don't have an account? <Link to="/register">Register now</Link>
         </p>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { API_BASE_URL } from "../../config/api";
-import { useAuth } from "../AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import AddressManagement from "./AddressManagement";
 import "./userprofile.css";
 

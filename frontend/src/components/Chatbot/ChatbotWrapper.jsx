@@ -1,6 +1,7 @@
 import React from 'react';
-import { useAuth } from '../AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import Chatbot from './Chatbot';
+
 
 export default function ChatbotWrapper() {
     const { isLoggedIn } = useAuth();

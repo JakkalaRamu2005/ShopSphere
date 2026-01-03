@@ -4,6 +4,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require("jsonwebtoken");
 const { OAuth2Client } = require('google-auth-library');
 const { sendWelcomeEmail } = require('../services/emailService');
+const { sendSMS } = require('../services/smsService');
+
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -308,5 +310,150 @@ exports.changePassword = async (request, response) => {
     } catch (error) {
         console.error('Change password error:', error);
         return response.status(500).json({ message: "Internal server error" });
+    }
+};
+
+/**
+ * Generate and send OTP to phone number
+ */
+exports.sendOtp = async (request, response) => {
+    try {
+        const { phoneNumber } = request.body;
+
+        if (!phoneNumber || phoneNumber.length !== 10) {
+            return response.status(400).json({ message: "Invalid phone number. Please provide a 10-digit number." });
+        }
+
+        // Rate limiting check
+        const [userRows] = await db.execute(
+            'SELECT id, lastOtpRequest FROM users WHERE phoneNumber = ?',
+            [phoneNumber]
+        );
+
+        const now = new Date();
+        if (userRows.length > 0 && userRows[0].lastOtpRequest) {
+            const lastRequest = new Date(userRows[0].lastOtpRequest);
+            const diffSeconds = (now - lastRequest) / 1000;
+            if (diffSeconds < 60) {
+                return response.status(429).json({ message: `Please wait ${Math.ceil(60 - diffSeconds)} seconds before requesting another OTP.` });
+            }
+        }
+
+        // Generate 6-digit OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const hashedOtp = await bcrypt.hash(otp, 10);
+        const expiry = new Date(now.getTime() + 5 * 60000); // 5 minutes
+
+        // Save OTP to database
+        if (userRows.length > 0) {
+            await db.execute(
+                'UPDATE users SET otp = ?, otpExpiry = ?, otpAttempts = 0, lastOtpRequest = ? WHERE phoneNumber = ?',
+                [hashedOtp, expiry, now, phoneNumber]
+            );
+        } else {
+            // Create user for first time phone login
+            await db.execute(
+                'INSERT INTO users (phoneNumber, email, password, otp, otpExpiry, lastOtpRequest) VALUES (?, ?, ?, ?, ?, ?)',
+                [phoneNumber, `phone_${phoneNumber}@temp.com`, 'authkey_placeholder', hashedOtp, expiry, now]
+            );
+        }
+
+        // Send SMS via Authkey
+        try {
+            await sendSMS(`+91${phoneNumber}`, `Your OTP for ShopSphere is ${otp}. Valid for 5 minutes.`);
+        } catch (smsError) {
+            console.error('SMS Service Failed:', smsError.message);
+            return response.status(502).json({
+                message: "Failed to send SMS. Please check server logs for details.",
+                error: smsError.message
+            });
+        }
+
+        return response.status(200).json({ success: true, message: "OTP sent successfully" });
+
+    } catch (error) {
+        console.error('Send OTP error:', error);
+        return response.status(500).json({ message: "Internal server error during OTP generation." });
+    }
+};
+
+/**
+ * Verify OTP and login user
+ */
+exports.verifyOtp = async (request, response) => {
+    try {
+        const { phoneNumber, otp } = request.body;
+
+        if (!phoneNumber || !otp) {
+            return response.status(400).json({ message: "Phone number and OTP are required" });
+        }
+
+        const [users] = await db.execute(
+            'SELECT * FROM users WHERE phoneNumber = ?',
+            [phoneNumber]
+        );
+
+        if (users.length === 0) {
+            return response.status(404).json({ message: "User not found" });
+        }
+
+        const user = users[0];
+
+        if (!user.otp || !user.otpExpiry) {
+            return response.status(400).json({ message: "No OTP requested" });
+        }
+
+        if (new Date() > new Date(user.otpExpiry)) {
+            return response.status(400).json({ message: "OTP has expired" });
+        }
+
+        if (user.otpAttempts >= 3) {
+            return response.status(403).json({ message: "Max attempts reached. Please request a new OTP." });
+        }
+
+        const isOtpValid = await bcrypt.compare(otp, user.otp);
+
+        if (!isOtpValid) {
+            await db.execute(
+                'UPDATE users SET otpAttempts = otpAttempts + 1 WHERE id = ?',
+                [user.id]
+            );
+            return response.status(401).json({ message: "Invalid OTP" });
+        }
+
+        // Valid OTP
+        await db.execute(
+            'UPDATE users SET isPhoneVerified = TRUE, otp = NULL, otpExpiry = NULL, otpAttempts = 0 WHERE id = ?',
+            [user.id]
+        );
+
+        const token = jwt.sign(
+            { id: user.id, email: user.email, role: user.role },
+            process.env.JWT_SECRET,
+            { expiresIn: process.env.JWT_EXPIRES_IN }
+        );
+
+        response.cookie('token', token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'None',
+            maxAge: 24 * 60 * 1000 * 60
+        });
+
+        return response.status(200).json({
+            success: true,
+            message: "Login successful",
+            token: token,
+            user: {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                role: user.role
+            }
+        });
+
+    } catch (error) {
+        console.error('Verify OTP error:', error);
+        return response.status(500).json({ message: "OTP verification failed" });
     }
 };

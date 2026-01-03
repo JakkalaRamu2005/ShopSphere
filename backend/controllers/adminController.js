@@ -15,7 +15,24 @@ const getAllProducts = async (req, res) => {
             ORDER BY p.created_at DESC
         `);
 
-        res.json({ success: true, products });
+        // Parse images JSON for each product
+        const productsWithImages = products.map(product => {
+            let images = [];
+            if (product.images) {
+                try {
+                    images = typeof product.images === 'string' ? JSON.parse(product.images) : product.images;
+                } catch (e) {
+                    console.error('Error parsing images JSON for product', product.id, e);
+                    images = [];
+                }
+            }
+            return {
+                ...product,
+                images: Array.isArray(images) ? images : []
+            };
+        });
+
+        res.json({ success: true, products: productsWithImages });
     } catch (error) {
         console.error('Error fetching products:', error);
         res.status(500).json({ success: false, message: 'Failed to fetch products' });
@@ -35,10 +52,18 @@ const addProduct = async (req, res) => {
             });
         }
 
+        // Convert image string to JSON array for images column
+        let imagesJson = '[]';
+        if (image) {
+            // If image is a comma-separated string, split it; otherwise use as single item
+            const imageArray = image.includes(',') ? image.split(',').map(url => url.trim()) : [image];
+            imagesJson = JSON.stringify(imageArray);
+        }
+
         const [result] = await db.query(
-            `INSERT INTO products (title, description, price, category, image, stock, created_by) 
+            `INSERT INTO products (title, description, price, category, images, stock, created_by) 
              VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [title, description, price, category, image, stock || 0, createdBy]
+            [title, description, price, category, imagesJson, stock || 0, createdBy]
         );
 
         res.status(201).json({
@@ -58,11 +83,19 @@ const updateProduct = async (req, res) => {
         const { id } = req.params;
         const { title, description, price, category, image, stock } = req.body;
 
+        // Convert image string to JSON array for images column
+        let imagesJson = '[]';
+        if (image) {
+            // If image is a comma-separated string, split it; otherwise use as single item
+            const imageArray = image.includes(',') ? image.split(',').map(url => url.trim()) : [image];
+            imagesJson = JSON.stringify(imageArray);
+        }
+
         const [result] = await db.query(
             `UPDATE products 
-             SET title = ?, description = ?, price = ?, category = ?, image = ?, stock = ?
+             SET title = ?, description = ?, price = ?, category = ?, images = ?, stock = ?
              WHERE id = ?`,
-            [title, description, price, category, image, stock, id]
+            [title, description, price, category, imagesJson, stock, id]
         );
 
         if (result.affectedRows === 0) {

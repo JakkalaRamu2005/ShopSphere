@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from 'react-router'
 // import { useState, useEffect } from 'react';
-import { useAuth } from './AuthContext';
+import { useAuth } from '../context/AuthContext';
 
 export default function ProtectedRoute() {
 
