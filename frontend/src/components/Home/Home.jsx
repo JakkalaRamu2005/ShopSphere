@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { FaTruck, FaLock, FaUndo, FaHeadset } from "react-icons/fa";
 import Carousel from "../Carousel/Carousel";
-import FeaturedProducts from "../FeaturedProducts/FeaturedProducts";
+
 import DealsSection from "../DealsSection/DealsSection";
 import "./home.css";
 
@@ -100,16 +100,7 @@ function Home() {
         <DealsSection limit={4} />
       </section>
 
-      {/* Featured Products Section */}
-      <section className="featured-products-section">
-        <div className="section-header">
-          <h2 className="section-title">Featured Products</h2>
-          <button className="view-all-btn" onClick={handleShopNow}>
-            View All →
-          </button>
-        </div>
-        <FeaturedProducts limit={8} />
-      </section>
+
 
       {/* Trust Signals Section */}
       <section className="trust-section">

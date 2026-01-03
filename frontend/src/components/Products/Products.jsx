@@ -107,6 +107,17 @@ function Products() {
     }
   }, []);
 
+  // Read category from URL parameters
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const categoryParam = params.get('category');
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    } else {
+      setSelectedCategory("all");
+    }
+  }, [location.search]);
+
   // Update search query from URL parameters
   useEffect(() => {
     const params = new URLSearchParams(location.search);

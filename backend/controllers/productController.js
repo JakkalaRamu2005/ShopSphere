@@ -1,79 +1,23 @@
-const db = require('../db');
+const productService = require('../services/ProductService');
+const logger = require('../config/logger');
 
-// Get all products (both admin and fakestore)
+/**
+ * Get all products with optional filtering
+ */
 const getAllProducts = async (req, res) => {
     try {
-        const { category, source, minPrice, maxPrice, sort } = req.query;
-
-        let query = 'SELECT * FROM products WHERE 1=1';
-        const params = [];
-
-        // Filter by category
-        if (category) {
-            query += ' AND category = ?';
-            params.push(category);
-        }
-
-        // Filter by source (admin or fakestore)
-        if (source) {
-            query += ' AND source = ?';
-            params.push(source);
-        }
-
-        // Filter by price range
-        if (minPrice) {
-            query += ' AND price >= ?';
-            params.push(parseFloat(minPrice));
-        }
-        if (maxPrice) {
-            query += ' AND price <= ?';
-            params.push(parseFloat(maxPrice));
-        }
-
-        // Sorting
-        if (sort === 'price_asc') {
-            query += ' ORDER BY price ASC';
-        } else if (sort === 'price_desc') {
-            query += ' ORDER BY price DESC';
-        } else if (sort === 'rating') {
-            query += ' ORDER BY rating_rate DESC';
-        } else {
-            query += ' ORDER BY created_at DESC';
-        }
-
-        const [products] = await db.query(query, params);
-
-        // Parse images if they are strings (ensure they are always arrays)
-        const productsWithImages = products.map(product => {
-            let images = [];
-            if (product.images) {
-                // Debug: Log the type and value of images
-                console.log(`Product ${product.id} - images type:`, typeof product.images);
-                console.log(`Product ${product.id} - images value:`, product.images);
-
-                try {
-                    images = typeof product.images === 'string' ? JSON.parse(product.images) : product.images;
-                } catch (e) {
-                    console.error('Error parsing images JSON for product', product.id, e);
-                    // Fallback to treating as single string or empty
-                    images = typeof product.images === 'string' ? [product.images] : [];
-                }
-
-                console.log(`Product ${product.id} - parsed images:`, images);
-            }
-            return {
-                ...product,
-                images: Array.isArray(images) ? images : []
-            };
-        });
+        const products = await productService.getAllProducts(req.query);
 
         res.status(200).json({
             success: true,
-            count: productsWithImages.length,
-            products: productsWithImages
+            count: products.length,
+            products
         });
     } catch (error) {
-        console.error('Error fetching products:', error);
+        logger.error('Error in getAllProducts controller:', {
+            error: error.message,
+            stack: error.stack
+        });
         res.status(500).json({
             success: false,
             message: 'Error fetching products',
@@ -82,40 +26,30 @@ const getAllProducts = async (req, res) => {
     }
 };
 
-// Get single product by ID
+/**
+ * Get single product by ID
+ */
 const getProductById = async (req, res) => {
     try {
         const { id } = req.params;
+        const product = await productService.getProductById(id);
 
-        const [products] = await db.query(
-            'SELECT * FROM products WHERE id = ?',
-            [id]
-        );
-
-        if (products.length === 0) {
+        if (!product) {
             return res.status(404).json({
                 success: false,
                 message: 'Product not found'
             });
         }
 
-        const product = products[0];
-        let images = [];
-        if (product.images) {
-            try {
-                images = typeof product.images === 'string' ? JSON.parse(product.images) : product.images;
-            } catch (e) {
-                images = [];
-            }
-        }
-        product.images = Array.isArray(images) ? images : [];
-
         res.status(200).json({
             success: true,
-            product: product
+            product
         });
     } catch (error) {
-        console.error('Error fetching product:', error);
+        logger.error('Error in getProductById controller:', {
+            error: error.message,
+            productId: req.params.id
+        });
         res.status(500).json({
             success: false,
             message: 'Error fetching product',
@@ -124,34 +58,25 @@ const getProductById = async (req, res) => {
     }
 };
 
-// Get products by category
+/**
+ * Get products by category
+ */
 const getProductsByCategory = async (req, res) => {
     try {
         const { category } = req.params;
-
-        const [products] = await db.query(
-            'SELECT * FROM products WHERE category = ? ORDER BY created_at DESC',
-            [category]
-        );
-
-        const productsWithImages = products.map(product => {
-            let images = [];
-            if (product.images) {
-                try {
-                    images = typeof product.images === 'string' ? JSON.parse(product.images) : product.images;
-                } catch (e) { images = []; }
-            }
-            return { ...product, images: Array.isArray(images) ? images : [] };
-        });
+        const products = await productService.getProductsByCategory(category);
 
         res.status(200).json({
             success: true,
-            count: productsWithImages.length,
+            count: products.length,
             category,
-            products: productsWithImages
+            products
         });
     } catch (error) {
-        console.error('Error fetching products by category:', error);
+        logger.error('Error in getProductsByCategory controller:', {
+            error: error.message,
+            category: req.params.category
+        });
         res.status(500).json({
             success: false,
             message: 'Error fetching products by category',
@@ -160,10 +85,13 @@ const getProductsByCategory = async (req, res) => {
     }
 };
 
-// Get all categories with product counts
+/**
+ * Get all categories with product counts
+ */
 const getAllCategories = async (req, res) => {
     try {
-        const [categories] = await db.query(
+        const { pool } = require('../config/database');
+        const [categories] = await pool.query(
             'SELECT category, COUNT(*) as product_count FROM products GROUP BY category ORDER BY category'
         );
 
@@ -173,7 +101,9 @@ const getAllCategories = async (req, res) => {
             categories
         });
     } catch (error) {
-        console.error('Error fetching categories:', error);
+        logger.error('Error in getAllCategories controller:', {
+            error: error.message
+        });
         res.status(500).json({
             success: false,
             message: 'Error fetching categories',
@@ -182,7 +112,9 @@ const getAllCategories = async (req, res) => {
     }
 };
 
-// Search products
+/**
+ * Search products
+ */
 const searchProducts = async (req, res) => {
     try {
         const { q } = req.query;
@@ -194,30 +126,19 @@ const searchProducts = async (req, res) => {
             });
         }
 
-        const searchTerm = `%${q}%`;
-        const [products] = await db.query(
-            'SELECT * FROM products WHERE title LIKE ? OR description LIKE ? OR category LIKE ? ORDER BY created_at DESC',
-            [searchTerm, searchTerm, searchTerm]
-        );
-
-        const productsWithImages = products.map(product => {
-            let images = [];
-            if (product.images) {
-                try {
-                    images = typeof product.images === 'string' ? JSON.parse(product.images) : product.images;
-                } catch (e) { images = []; }
-            }
-            return { ...product, images: Array.isArray(images) ? images : [] };
-        });
+        const products = await productService.searchProducts(q);
 
         res.status(200).json({
             success: true,
-            count: productsWithImages.length,
+            count: products.length,
             searchQuery: q,
-            products: productsWithImages
+            products
         });
     } catch (error) {
-        console.error('Error searching products:', error);
+        logger.error('Error in searchProducts controller:', {
+            error: error.message,
+            query: req.query.q
+        });
         res.status(500).json({
             success: false,
             message: 'Error searching products',
@@ -226,25 +147,23 @@ const searchProducts = async (req, res) => {
     }
 };
 
-// Get featured products (high ratings)
+/**
+ * Get featured products (high ratings)
+ */
 const getFeaturedProducts = async (req, res) => {
     try {
         const limit = parseInt(req.query.limit) || 8;
+        const { pool } = require('../config/database');
 
-        const [products] = await db.query(
+        const [products] = await pool.query(
             'SELECT * FROM products WHERE rating_rate >= 4.0 ORDER BY rating_rate DESC, rating_count DESC LIMIT ?',
             [limit]
         );
 
-        const productsWithImages = products.map(product => {
-            let images = [];
-            if (product.images) {
-                try {
-                    images = typeof product.images === 'string' ? JSON.parse(product.images) : product.images;
-                } catch (e) { images = []; }
-            }
-            return { ...product, images: Array.isArray(images) ? images : [] };
-        });
+        const productsWithImages = products.map(product => ({
+            ...product,
+            images: productService.parseImages(product.images)
+        }));
 
         res.status(200).json({
             success: true,
@@ -252,7 +171,9 @@ const getFeaturedProducts = async (req, res) => {
             products: productsWithImages
         });
     } catch (error) {
-        console.error('Error fetching featured products:', error);
+        logger.error('Error in getFeaturedProducts controller:', {
+            error: error.message
+        });
         res.status(500).json({
             success: false,
             message: 'Error fetching featured products',

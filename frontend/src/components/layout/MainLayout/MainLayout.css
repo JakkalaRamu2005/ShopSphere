@@ -1,7 +1,8 @@
 /* Main Layout Styles */
 .main-content {
-    min-height: calc(100vh - 80px);
-    padding-top: 80px;
+    min-height: calc(100vh - 60px);
+    padding: 0;
+    margin: 0;
     /* Account for fixed navbar */
     width: 100%;
 }

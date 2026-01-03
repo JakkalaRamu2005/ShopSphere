@@ -2,6 +2,11 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const cookieParser = require('cookie-parser');
+const logger = require('./config/logger');
+
+// Import security middleware
+const { helmetConfig, generalLimiter, authLimiter, otpLimiter } = require('./middleware/security');
+const { responseMiddleware } = require('./utils/ApiResponse');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -22,6 +27,9 @@ const categoryRoutes = require("./routes/categories");
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 
 const app = express();
+
+// Security Middleware (Apply FIRST)
+app.use(helmetConfig);
 
 // Middleware
 app.use(cookieParser());
@@ -51,6 +59,18 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+// Response standardization middleware
+app.use(responseMiddleware);
+
+// General rate limiting (apply to all routes)
+app.use('/api/', generalLimiter);
+
+// Routes with specific rate limiting
+app.use('/auth/login', authLimiter);
+app.use('/auth/register', authLimiter);
+app.use('/auth/send-otp', otpLimiter);
+app.use('/auth/verify-otp', otpLimiter);
+
 // Routes
 app.use('/auth', authRoutes);
 app.use('/cart', cartRoutes);
@@ -79,7 +99,28 @@ app.use(errorHandler);
 
 // Start server
 const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
-  console.log(`✅ Server is running at http://localhost:${PORT}/`);
-  console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
+const server = app.listen(PORT, () => {
+  logger.info('✅ Server started successfully', {
+    port: PORT,
+    environment: process.env.NODE_ENV || 'development',
+    nodeVersion: process.version
+  });
+  logger.info(`🌐 Server URL: http://localhost:${PORT}/`);
+  logger.info(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  logger.info('SIGTERM signal received: closing HTTP server');
+  server.close(() => {
+    logger.info('HTTP server closed');
+  });
+});
+
+process.on('SIGINT', () => {
+  logger.info('SIGINT signal received: closing HTTP server');
+  server.close(() => {
+    logger.info('HTTP server closed');
+    process.exit(0);
+  });
 });

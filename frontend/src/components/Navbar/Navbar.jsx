@@ -17,6 +17,9 @@ function Navbar() {
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const profileDropdownRef = useRef(null);
 
+  // Check if current page is home
+  const isHomePage = location.pathname === '/';
+
   // Search states
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -176,50 +179,52 @@ function Navbar() {
           <span className="brand-text">ShopSphere</span>
         </Link>
 
-        {/* Categories Dropdown */}
-        <div className="categories-dropdown-container">
-          <button
-            className="categories-dropdown-btn"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          >
-            <FaBars size={16} />
-            <span>Categories</span>
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
-              <path d="M6 9L1 4h10z" />
-            </svg>
-          </button>
+        {/* Categories Dropdown - Show only on home page */}
+        {isHomePage && (
+          <div className="categories-dropdown-container">
+            <button
+              className="categories-dropdown-btn"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              <FaBars size={16} />
+              <span>Categories</span>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                <path d="M6 9L1 4h10z" />
+              </svg>
+            </button>
 
-          {isMobileMenuOpen && (
-            <div className="categories-mega-menu">
-              <div className="mega-menu-content">
-                <div className="category-column">
-                  <h4>Fashion</h4>
-                  <Link to="/products?category=men's clothing" onClick={handleLinkClick}>Men's Clothing</Link>
-                  <Link to="/products?category=women's clothing" onClick={handleLinkClick}>Women's Clothing</Link>
-                  <Link to="/products?category=jewelry" onClick={handleLinkClick}>Jewelry</Link>
-                </div>
-                <div className="category-column">
-                  <h4>Electronics</h4>
-                  <Link to="/products?category=electronics" onClick={handleLinkClick}>All Electronics</Link>
-                  <Link to="/products?category=laptops" onClick={handleLinkClick}>Laptops</Link>
-                  <Link to="/products?category=mobiles" onClick={handleLinkClick}>Mobiles</Link>
-                </div>
-                <div className="category-column">
-                  <h4>Accessories</h4>
-                  <Link to="/products?category=accessories" onClick={handleLinkClick}>All Accessories</Link>
-                  <Link to="/products?category=bags" onClick={handleLinkClick}>Bags</Link>
-                  <Link to="/products?category=watches" onClick={handleLinkClick}>Watches</Link>
-                </div>
-                <div className="category-column">
-                  <h4>More</h4>
-                  <Link to="/products" onClick={handleLinkClick}>View All Products</Link>
-                  <Link to="/products?sort=newest" onClick={handleLinkClick}>New Arrivals</Link>
-                  <Link to="/products?sort=rating" onClick={handleLinkClick}>Best Sellers</Link>
+            {isMobileMenuOpen && (
+              <div className="categories-mega-menu">
+                <div className="mega-menu-content">
+                  <div className="category-column">
+                    <h4>Fashion</h4>
+                    <Link to="/products?category=men's clothing" onClick={handleLinkClick}>Men's Clothing</Link>
+                    <Link to="/products?category=women's clothing" onClick={handleLinkClick}>Women's Clothing</Link>
+                    <Link to="/products?category=jewelry" onClick={handleLinkClick}>Jewelry</Link>
+                  </div>
+                  <div className="category-column">
+                    <h4>Electronics</h4>
+                    <Link to="/products?category=electronics" onClick={handleLinkClick}>All Electronics</Link>
+                    <Link to="/products?category=laptops" onClick={handleLinkClick}>Laptops</Link>
+                    <Link to="/products?category=mobiles" onClick={handleLinkClick}>Mobiles</Link>
+                  </div>
+                  <div className="category-column">
+                    <h4>Accessories</h4>
+                    <Link to="/products?category=accessories" onClick={handleLinkClick}>All Accessories</Link>
+                    <Link to="/products?category=bags" onClick={handleLinkClick}>Bags</Link>
+                    <Link to="/products?category=watches" onClick={handleLinkClick}>Watches</Link>
+                  </div>
+                  <div className="category-column">
+                    <h4>More</h4>
+                    <Link to="/products" onClick={handleLinkClick}>View All Products</Link>
+                    <Link to="/products?sort=newest" onClick={handleLinkClick}>New Arrivals</Link>
+                    <Link to="/products?sort=rating" onClick={handleLinkClick}>Best Sellers</Link>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
 
         {/* Integrated Search Bar with Autocomplete */}
         <div className="navbar-search-container" ref={searchRef}>

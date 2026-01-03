@@ -1,54 +1,59 @@
-
-const db = require('../db');
-const bcrypt = require('bcryptjs');
-const jwt = require("jsonwebtoken");
+const authService = require('../services/AuthService');
+const logger = require('../config/logger');
 const { OAuth2Client } = require('google-auth-library');
 const { sendWelcomeEmail } = require('../services/emailService');
 const { sendSMS } = require('../services/smsService');
-
+const { pool } = require('../config/database');
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-async function findUserByEmail(email) {
-    const [rows] = await db.execute('SELECT id, name, email, password, role, status, google_id FROM users WHERE email = ?', [email]);
-    return rows[0];
-}
-
-
+/**
+ * Register new user
+ */
 exports.register = async (request, response) => {
     try {
-        const { name, email, password } = request.body;
-        // console.log(request.body);
-        if (!email || !password) {
-            return response.status(400).json({ message: "Email and password are required" });
-        }
-        const existingUser = await findUserByEmail(email);
+        const { name, email, password, phone } = request.body;
+
+        // Check if user already exists
+        const existingUser = await authService.findUserByEmail(email);
         if (existingUser) {
-            return response.status(400).json({ message: "User already exists" });
+            return response.status(400).json({
+                success: false,
+                message: "User already exists with this email"
+            });
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+        // Create new user
+        const userId = await authService.createUser({ name, email, password, phone });
 
-        await db.execute(
-            'INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
-            [name || null, email, hashedPassword]
+        // Send welcome email (async, don't wait)
+        sendWelcomeEmail(email, name).catch(err => {
+            logger.error('Failed to send welcome email:', { error: err.message, email });
+        });
 
-        );
+        logger.info('User registered successfully', { userId, email });
 
-        // Send welcome email (don't wait for it to complete)
-        sendWelcomeEmail(email, name || 'User').catch(err =>
-            console.error('Failed to send welcome email:', err)
-        );
-
-        return response.status(201).json({ message: "User registered successfully" });
-
+        response.status(201).json({
+            success: true,
+            message: "User registered successfully",
+            userId
+        });
     } catch (error) {
-        console.error(error);
-        return response.status(500).json({ message: "Internal server error" });
+        logger.error('Error in register controller:', {
+            error: error.message,
+            stack: error.stack
+        });
+        response.status(500).json({
+            success: false,
+            message: "Error registering user",
+            error: error.message
+        });
     }
+};
 
-}
-
+/**
+ * Login user
+ */
 exports.login = async (request, response) => {
     try {
         const { email, password } = request.body;
@@ -57,34 +62,30 @@ exports.login = async (request, response) => {
             return response.status(400).json({ message: "Email and password are required" });
         }
 
-        const user = await findUserByEmail(email);
-
+        // Find user
+        const user = await authService.findUserByEmail(email);
         if (!user) {
             return response.status(404).json({ message: "User not found" });
         }
 
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-
+        // Verify password
+        const isPasswordValid = await authService.verifyPassword(password, user.password);
         if (!isPasswordValid) {
             return response.status(401).json({ message: "Invalid password" });
         }
 
-        const token = jwt.sign(
-            { id: user.id, email: user.email, role: user.role },
-            process.env.JWT_SECRET,
-            { expiresIn: process.env.JWT_EXPIRES_IN }
-        )
+        // Generate token
+        const token = authService.generateToken(user);
 
-        console.log('Generated JWT for user', user.id, ':', token);
-
-        const isProduction = process.env.NODE_ENV === 'production';
+        logger.info('User logged in successfully', { userId: user.id, email });
 
         response.cookie('token', token, {
             httpOnly: true,
-            secure: true, // Always true for HTTPS (Render)
-            sameSite: 'None', // Required for cross-site cookies
+            secure: true,
+            sameSite: 'None',
             maxAge: 24 * 60 * 60 * 1000
-        })
+        });
+
         return response.status(200).json({
             message: "Login successful",
             token: token,
@@ -97,12 +98,15 @@ exports.login = async (request, response) => {
         });
 
     } catch (error) {
-        console.error(error);
+        logger.error('Error in login controller:', {
+            error: error.message,
+            stack: error.stack
+        });
         return response.status(500).json({ message: "Internal server error" });
     }
-
 };
 
+// Keep all other existing functions unchanged - just add logger where there's console.log
 exports.googleLogin = async (request, response) => {
     try {
         const { credential } = request.body;
@@ -111,7 +115,6 @@ exports.googleLogin = async (request, response) => {
             return response.status(400).json({ message: "Google credential is required" });
         }
 
-        // Verify Google Token
         const ticket = await googleClient.verifyIdToken({
             idToken: credential,
             audience: process.env.GOOGLE_CLIENT_ID,
@@ -120,21 +123,17 @@ exports.googleLogin = async (request, response) => {
         const payload = ticket.getPayload();
         const { email, name, sub: googleId, picture } = payload;
 
-        let user = await findUserByEmail(email);
+        let user = await authService.findUserByEmail(email);
 
         if (!user) {
-            // Create new user if they don't exist
-            await db.execute(
+            await pool.execute(
                 'INSERT INTO users (name, email, google_id, profile_pic) VALUES (?, ?, ?, ?)',
                 [name, email, googleId, picture]
             );
-            user = await findUserByEmail(email);
-
-            // Send welcome email
-            sendWelcomeEmail(email, name).catch(err => console.error('Welcome email error:', err));
+            user = await authService.findUserByEmail(email);
+            sendWelcomeEmail(email, name).catch(err => logger.error('Welcome email error:', { error: err.message }));
         } else if (!user.google_id) {
-            // Link Google account to existing email if not linked
-            await db.execute(
+            await pool.execute(
                 'UPDATE users SET google_id = ?, profile_pic = ? WHERE id = ?',
                 [googleId, picture, user.id]
             );
@@ -144,12 +143,7 @@ exports.googleLogin = async (request, response) => {
             return response.status(403).json({ message: "Your account has been blocked" });
         }
 
-        // Generate JWT
-        const token = jwt.sign(
-            { id: user.id, email: user.email, role: user.role },
-            process.env.JWT_SECRET,
-            { expiresIn: process.env.JWT_EXPIRES_IN }
-        );
+        const token = authService.generateToken(user);
 
         response.cookie('token', token, {
             httpOnly: true,
@@ -172,7 +166,7 @@ exports.googleLogin = async (request, response) => {
         });
 
     } catch (error) {
-        console.error('Google login error:', error);
+        logger.error('Google login error:', { error: error.message });
         return response.status(500).json({ message: "Google authentication failed" });
     }
 };
@@ -180,16 +174,13 @@ exports.googleLogin = async (request, response) => {
 exports.logout = (request, response) => {
     response.clearCookie('token');
     return response.status(200).json({ message: "Logout successful" });
-}
+};
 
-/**
- * Get user profile information
- */
 exports.getUserProfile = async (request, response) => {
     try {
         const userId = request.user.id;
 
-        const [rows] = await db.execute(
+        const [rows] = await pool.execute(
             'SELECT id, name, email, role, status, created_at, updated_at FROM users WHERE id = ?',
             [userId]
         );
@@ -204,14 +195,11 @@ exports.getUserProfile = async (request, response) => {
         });
 
     } catch (error) {
-        console.error('Get profile error:', error);
+        logger.error('Get profile error:', { error: error.message });
         return response.status(500).json({ message: "Internal server error" });
     }
 };
 
-/**
- * Update user profile (name and email)
- */
 exports.updateProfile = async (request, response) => {
     try {
         const userId = request.user.id;
@@ -221,8 +209,7 @@ exports.updateProfile = async (request, response) => {
             return response.status(400).json({ message: "Email is required" });
         }
 
-        // Check if email is already taken by another user
-        const [existingUsers] = await db.execute(
+        const [existingUsers] = await pool.execute(
             'SELECT id FROM users WHERE email = ? AND id != ?',
             [email, userId]
         );
@@ -231,14 +218,12 @@ exports.updateProfile = async (request, response) => {
             return response.status(400).json({ message: "Email already in use" });
         }
 
-        // Update user profile
-        await db.execute(
+        await pool.execute(
             'UPDATE users SET name = ?, email = ? WHERE id = ?',
             [name || null, email, userId]
         );
 
-        // Fetch updated user data
-        const [rows] = await db.execute(
+        const [rows] = await pool.execute(
             'SELECT id, name, email, created_at, updated_at FROM users WHERE id = ?',
             [userId]
         );
@@ -250,14 +235,11 @@ exports.updateProfile = async (request, response) => {
         });
 
     } catch (error) {
-        console.error('Update profile error:', error);
+        logger.error('Update profile error:', { error: error.message });
         return response.status(500).json({ message: "Internal server error" });
     }
 };
 
-/**
- * Change user password
- */
 exports.changePassword = async (request, response) => {
     try {
         const userId = request.user.id;
@@ -269,15 +251,13 @@ exports.changePassword = async (request, response) => {
             });
         }
 
-        // Validate new password length
         if (newPassword.length < 6) {
             return response.status(400).json({
                 message: "New password must be at least 6 characters long"
             });
         }
 
-        // Get current user
-        const [users] = await db.execute(
+        const [users] = await pool.execute(
             'SELECT password FROM users WHERE id = ?',
             [userId]
         );
@@ -286,21 +266,13 @@ exports.changePassword = async (request, response) => {
             return response.status(404).json({ message: "User not found" });
         }
 
-        // Verify current password
-        const isPasswordValid = await bcrypt.compare(currentPassword, users[0].password);
+        const isPasswordValid = await authService.verifyPassword(currentPassword, users[0].password);
 
         if (!isPasswordValid) {
             return response.status(401).json({ message: "Current password is incorrect" });
         }
 
-        // Hash new password
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-        // Update password
-        await db.execute(
-            'UPDATE users SET password = ? WHERE id = ?',
-            [hashedPassword, userId]
-        );
+        await authService.changePassword(userId, newPassword);
 
         return response.status(200).json({
             success: true,
@@ -308,14 +280,11 @@ exports.changePassword = async (request, response) => {
         });
 
     } catch (error) {
-        console.error('Change password error:', error);
+        logger.error('Change password error:', { error: error.message });
         return response.status(500).json({ message: "Internal server error" });
     }
 };
 
-/**
- * Generate and send OTP to phone number
- */
 exports.sendOtp = async (request, response) => {
     try {
         const { phoneNumber } = request.body;
@@ -324,8 +293,7 @@ exports.sendOtp = async (request, response) => {
             return response.status(400).json({ message: "Invalid phone number. Please provide a 10-digit number." });
         }
 
-        // Rate limiting check
-        const [userRows] = await db.execute(
+        const [userRows] = await pool.execute(
             'SELECT id, lastOtpRequest FROM users WHERE phoneNumber = ?',
             [phoneNumber]
         );
@@ -339,30 +307,15 @@ exports.sendOtp = async (request, response) => {
             }
         }
 
-        // Generate 6-digit OTP
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        const hashedOtp = await bcrypt.hash(otp, 10);
-        const expiry = new Date(now.getTime() + 5 * 60000); // 5 minutes
+        const expiry = new Date(now.getTime() + 5 * 60000);
 
-        // Save OTP to database
-        if (userRows.length > 0) {
-            await db.execute(
-                'UPDATE users SET otp = ?, otpExpiry = ?, otpAttempts = 0, lastOtpRequest = ? WHERE phoneNumber = ?',
-                [hashedOtp, expiry, now, phoneNumber]
-            );
-        } else {
-            // Create user for first time phone login
-            await db.execute(
-                'INSERT INTO users (phoneNumber, email, password, otp, otpExpiry, lastOtpRequest) VALUES (?, ?, ?, ?, ?, ?)',
-                [phoneNumber, `phone_${phoneNumber}@temp.com`, 'authkey_placeholder', hashedOtp, expiry, now]
-            );
-        }
+        await authService.storeOTP(phoneNumber, otp, expiry);
 
-        // Send SMS via Authkey
         try {
             await sendSMS(`+91${phoneNumber}`, `Your OTP for ShopSphere is ${otp}. Valid for 5 minutes.`);
         } catch (smsError) {
-            console.error('SMS Service Failed:', smsError.message);
+            logger.error('SMS Service Failed:', { error: smsError.message });
             return response.status(502).json({
                 message: "Failed to send SMS. Please check server logs for details.",
                 error: smsError.message
@@ -372,14 +325,11 @@ exports.sendOtp = async (request, response) => {
         return response.status(200).json({ success: true, message: "OTP sent successfully" });
 
     } catch (error) {
-        console.error('Send OTP error:', error);
+        logger.error('Send OTP error:', { error: error.message });
         return response.status(500).json({ message: "Internal server error during OTP generation." });
     }
 };
 
-/**
- * Verify OTP and login user
- */
 exports.verifyOtp = async (request, response) => {
     try {
         const { phoneNumber, otp } = request.body;
@@ -388,50 +338,14 @@ exports.verifyOtp = async (request, response) => {
             return response.status(400).json({ message: "Phone number and OTP are required" });
         }
 
-        const [users] = await db.execute(
-            'SELECT * FROM users WHERE phoneNumber = ?',
-            [phoneNumber]
-        );
+        const isValid = await authService.verifyOTP(phoneNumber, otp);
 
-        if (users.length === 0) {
-            return response.status(404).json({ message: "User not found" });
+        if (!isValid) {
+            return response.status(401).json({ message: "Invalid or expired OTP" });
         }
 
-        const user = users[0];
-
-        if (!user.otp || !user.otpExpiry) {
-            return response.status(400).json({ message: "No OTP requested" });
-        }
-
-        if (new Date() > new Date(user.otpExpiry)) {
-            return response.status(400).json({ message: "OTP has expired" });
-        }
-
-        if (user.otpAttempts >= 3) {
-            return response.status(403).json({ message: "Max attempts reached. Please request a new OTP." });
-        }
-
-        const isOtpValid = await bcrypt.compare(otp, user.otp);
-
-        if (!isOtpValid) {
-            await db.execute(
-                'UPDATE users SET otpAttempts = otpAttempts + 1 WHERE id = ?',
-                [user.id]
-            );
-            return response.status(401).json({ message: "Invalid OTP" });
-        }
-
-        // Valid OTP
-        await db.execute(
-            'UPDATE users SET isPhoneVerified = TRUE, otp = NULL, otpExpiry = NULL, otpAttempts = 0 WHERE id = ?',
-            [user.id]
-        );
-
-        const token = jwt.sign(
-            { id: user.id, email: user.email, role: user.role },
-            process.env.JWT_SECRET,
-            { expiresIn: process.env.JWT_EXPIRES_IN }
-        );
+        const user = await authService.findUserByPhone(phoneNumber);
+        const token = authService.generateToken(user);
 
         response.cookie('token', token, {
             httpOnly: true,
@@ -453,7 +367,7 @@ exports.verifyOtp = async (request, response) => {
         });
 
     } catch (error) {
-        console.error('Verify OTP error:', error);
+        logger.error('Verify OTP error:', { error: error.message });
         return response.status(500).json({ message: "OTP verification failed" });
     }
 };

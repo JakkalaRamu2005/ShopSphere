@@ -19,6 +19,9 @@ function AdminProducts() {
         image: '',
         stock: ''
     });
+    const [imageFiles, setImageFiles] = useState([]);
+    const [existingImages, setExistingImages] = useState([]);
+    const [imagePreviews, setImagePreviews] = useState([]);
 
     useEffect(() => {
         if (!user || user.role !== 'admin') {
@@ -51,6 +54,28 @@ function AdminProducts() {
         });
     };
 
+    const handleImageChange = (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length > 5) {
+            alert('Maximum 5 images allowed');
+            return;
+        }
+        setImageFiles(files);
+
+        // Create preview URLs
+        const previews = files.map(file => URL.createObjectURL(file));
+        setImagePreviews(previews);
+    };
+
+    const removeExistingImage = (index) => {
+        setExistingImages(prev => prev.filter((_, i) => i !== index));
+    };
+
+    const removeNewImage = (index) => {
+        setImageFiles(prev => prev.filter((_, i) => i !== index));
+        setImagePreviews(prev => prev.filter((_, i) => i !== index));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -61,11 +86,27 @@ function AdminProducts() {
 
             const method = editingProduct ? 'PUT' : 'POST';
 
+            const formDataToSend = new FormData();
+            formDataToSend.append('title', formData.title);
+            formDataToSend.append('description', formData.description);
+            formDataToSend.append('price', formData.price);
+            formDataToSend.append('category', formData.category);
+            formDataToSend.append('stock', formData.stock);
+
+            // Add existing images for update
+            if (editingProduct && existingImages.length > 0) {
+                formDataToSend.append('existingImages', JSON.stringify(existingImages));
+            }
+
+            // Add new image files
+            imageFiles.forEach(file => {
+                formDataToSend.append('images', file);
+            });
+
             const response = await fetch(url, {
                 method,
-                headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify(formData)
+                body: formDataToSend
             });
 
             const data = await response.json();
@@ -86,18 +127,16 @@ function AdminProducts() {
 
     const handleEdit = (product) => {
         setEditingProduct(product);
-        // Convert images array to comma-separated string for editing
-        const imageString = product.images && product.images.length > 0
-            ? product.images.join(', ')
-            : '';
+        setExistingImages(product.images || []);
         setFormData({
             title: product.title,
             description: product.description || '',
             price: product.price,
             category: product.category || '',
-            image: imageString,
             stock: product.stock || 0
         });
+        setImageFiles([]);
+        setImagePreviews([]);
         setShowModal(true);
     };
 
@@ -134,6 +173,9 @@ function AdminProducts() {
             stock: ''
         });
         setEditingProduct(null);
+        setImageFiles([]);
+        setExistingImages([]);
+        setImagePreviews([]);
     };
 
     const handleAddNew = () => {
@@ -295,18 +337,106 @@ function AdminProducts() {
                                 </select>
                             </div>
 
+
                             <div className="form-group">
-                                <label>Image URLs (comma-separated for multiple images)</label>
+                                <label>Product Images (Max 5)</label>
+
+                                {/* Show existing images for edit */}
+                                {editingProduct && existingImages.length > 0 && (
+                                    <div className="existing-images">
+                                        <p style={{ fontSize: '14px', marginBottom: '8px', color: '#666' }}>Existing Images:</p>
+                                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '15px' }}>
+                                            {existingImages.map((img, index) => (
+                                                <div key={index} className="image-preview" style={{ position: 'relative', width: '80px', height: '80px' }}>
+                                                    <img
+                                                        src={img}
+                                                        alt={`Product ${index + 1}`}
+                                                        style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px', border: '2px solid #ddd' }}
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removeExistingImage(index)}
+                                                        style={{
+                                                            position: 'absolute',
+                                                            top: '-8px',
+                                                            right: '-8px',
+                                                            background: '#ff4444',
+                                                            color: 'white',
+                                                            border: 'none',
+                                                            borderRadius: '50%',
+                                                            width: '24px',
+                                                            height: '24px',
+                                                            cursor: 'pointer',
+                                                            fontSize: '16px',
+                                                            lineHeight: '1',
+                                                            fontWeight: 'bold'
+                                                        }}
+                                                    >
+                                                        ×
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* File input for new images */}
                                 <input
-                                    type="text"
-                                    name="image"
-                                    value={formData.image}
-                                    onChange={handleInputChange}
-                                    placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
+                                    type="file"
+                                    accept="image/*"
+                                    multiple
+                                    onChange={handleImageChange}
+                                    style={{
+                                        marginTop: '10px',
+                                        padding: '10px',
+                                        border: '2px dashed #ddd',
+                                        borderRadius: '4px',
+                                        width: '100%',
+                                        cursor: 'pointer'
+                                    }}
                                 />
                                 <small style={{ color: '#888', fontSize: '12px', marginTop: '4px', display: 'block' }}>
-                                    Enter one or more image URLs separated by commas
+                                    Select up to 5 images (JPG, PNG, WebP, max 5MB each)
                                 </small>
+
+                                {/* Preview selected files */}
+                                {imagePreviews.length > 0 && (
+                                    <div style={{ marginTop: '15px' }}>
+                                        <p style={{ fontSize: '14px', marginBottom: '8px', color: '#666' }}>New Images ({imagePreviews.length}):</p>
+                                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                                            {imagePreviews.map((preview, index) => (
+                                                <div key={index} style={{ position: 'relative', width: '80px', height: '80px' }}>
+                                                    <img
+                                                        src={preview}
+                                                        alt={`New ${index + 1}`}
+                                                        style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '4px', border: '2px solid #4CAF50' }}
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removeNewImage(index)}
+                                                        style={{
+                                                            position: 'absolute',
+                                                            top: '-8px',
+                                                            right: '-8px',
+                                                            background: '#ff4444',
+                                                            color: 'white',
+                                                            border: 'none',
+                                                            borderRadius: '50%',
+                                                            width: '24px',
+                                                            height: '24px',
+                                                            cursor: 'pointer',
+                                                            fontSize: '16px',
+                                                            lineHeight: '1',
+                                                            fontWeight: 'bold'
+                                                        }}
+                                                    >
+                                                        ×
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="modal-actions">

@@ -1,2 +1,11 @@
 /node_modules
+
+# Logs directory
+*.log
+logs/
+*.log.*
+error.log
+combined.log
+exceptions.log
+rejections.log
 .env 
