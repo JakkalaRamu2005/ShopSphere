@@ -1,6 +1,5 @@
 const db = require('../db');
-const cloudinary = require('../utils/cloudinary');
-const fs = require('fs');
+const { uploadToCloudinary } = require('../utils/cloudinary');
 
 
 // Add a new review
@@ -23,12 +22,7 @@ const addReview = async (req, res) => {
         // Upload image to Cloudinary if exists
         if (req.file) {
             try {
-                const result = await cloudinary.uploader.upload(req.file.path, {
-                    folder: 'product_reviews',
-                });
-                reviewImage = result.secure_url;
-                // Remove local file
-                fs.unlinkSync(req.file.path);
+                reviewImage = await uploadToCloudinary(req.file.buffer, 'product_reviews');
             } catch (err) {
                 console.error('Cloudinary upload error:', err);
                 return res.status(500).json({ success: false, message: 'Image upload failed' });
@@ -150,11 +144,7 @@ const updateReview = async (req, res) => {
         let reviewImage = null;
         if (req.file) {
             try {
-                const result = await cloudinary.uploader.upload(req.file.path, {
-                    folder: 'product_reviews',
-                });
-                reviewImage = result.secure_url;
-                fs.unlinkSync(req.file.path);
+                reviewImage = await uploadToCloudinary(req.file.buffer, 'product_reviews');
             } catch (err) {
                 console.error('Cloudinary upload error:', err);
             }

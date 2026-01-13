@@ -28,16 +28,13 @@ function AdminOrders() {
 
     const fetchOrders = async () => {
         try {
-            console.log('Fetching orders from:', `${API_BASE_URL}/admin/orders`);
             const response = await fetch(`${API_BASE_URL}/admin/orders`, {
                 credentials: 'include'
             });
             const data = await response.json();
-            console.log('Orders response:', data);
 
             if (data.success) {
                 setOrders(data.orders);
-                console.log('Orders loaded:', data.orders.length);
             } else {
                 console.error('Failed to fetch orders:', data.message);
                 showToast(data.message || 'Failed to load orders', 'error');

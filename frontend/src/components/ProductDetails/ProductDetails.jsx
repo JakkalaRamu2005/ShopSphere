@@ -42,7 +42,7 @@ function ProductDetails() {
         setLoading(false);
       })
       .catch((err) => {
-        console.log(err);
+        console.error('Error fetching product details:', err);
         setLoading(false);
       });
   }, [id]);

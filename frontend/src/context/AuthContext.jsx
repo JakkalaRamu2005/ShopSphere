@@ -58,7 +58,6 @@ const AuthProvider = ({ children }) => {
             });
 
             const data = await res.json();
-            // console.log(data);
 
             if (res.ok && data.token) {
                 // Save token to localStorage

@@ -20,8 +20,7 @@ export default function ContactUs() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Add your API call here
-    console.log("Form submitted:", formData);
+    // TODO: Add API call to send contact form data to backend
     setSubmitted(true);
     setFormData({ name: "", email: "", phone: "", subject: "", message: "" });
     setTimeout(() => setSubmitted(false), 5000);
@@ -36,7 +35,7 @@ export default function ContactUs() {
 
       <div className={styles.container}>
         <div className={styles.grid}>
-          
+
           {/* Contact Form */}
           <div className={styles.formSection}>
             <h2>Send us a message</h2>

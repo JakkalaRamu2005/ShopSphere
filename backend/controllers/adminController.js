@@ -42,7 +42,7 @@ const getAllProducts = async (req, res) => {
 // Add new product
 const addProduct = async (req, res) => {
     try {
-        const { title, description, price, category, image, stock } = req.body;
+        const { title, description, price, category, stock } = req.body;
         const createdBy = req.user.id;
 
         if (!title || !price) {
@@ -52,12 +52,20 @@ const addProduct = async (req, res) => {
             });
         }
 
-        // Convert image string to JSON array for images column
+        // Handle image uploads to Cloudinary
         let imagesJson = '[]';
-        if (image) {
-            // If image is a comma-separated string, split it; otherwise use as single item
-            const imageArray = image.includes(',') ? image.split(',').map(url => url.trim()) : [image];
-            imagesJson = JSON.stringify(imageArray);
+        if (req.files && req.files.length > 0) {
+            const { uploadMultipleToCloudinary } = require('../utils/cloudinary');
+            try {
+                const imageUrls = await uploadMultipleToCloudinary(req.files, 'products');
+                imagesJson = JSON.stringify(imageUrls);
+            } catch (uploadError) {
+                console.error('Image upload error:', uploadError);
+                return res.status(500).json({
+                    success: false,
+                    message: 'Failed to upload images'
+                });
+            }
         }
 
         const [result] = await db.query(
@@ -81,22 +89,59 @@ const addProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, description, price, category, image, stock } = req.body;
+        const { title, description, price, category, stock } = req.body;
 
-        // Convert image string to JSON array for images column
-        let imagesJson = '[]';
-        if (image) {
-            // If image is a comma-separated string, split it; otherwise use as single item
-            const imageArray = image.includes(',') ? image.split(',').map(url => url.trim()) : [image];
-            imagesJson = JSON.stringify(imageArray);
+        // Handle image uploads to Cloudinary
+        let imagesJson = null;
+        if (req.files && req.files.length > 0) {
+            const { uploadMultipleToCloudinary } = require('../utils/cloudinary');
+            try {
+                const imageUrls = await uploadMultipleToCloudinary(req.files, 'products');
+                imagesJson = JSON.stringify(imageUrls);
+            } catch (uploadError) {
+                console.error('Image upload error:', uploadError);
+                return res.status(500).json({
+                    success: false,
+                    message: 'Failed to upload images'
+                });
+            }
         }
 
-        const [result] = await db.query(
-            `UPDATE products 
-             SET title = ?, description = ?, price = ?, category = ?, images = ?, stock = ?
-             WHERE id = ?`,
-            [title, description, price, category, imagesJson, stock, id]
-        );
+        // Build update query dynamically based on what's provided
+        let updateQuery = 'UPDATE products SET ';
+        const updateValues = [];
+
+        if (title) {
+            updateQuery += 'title = ?, ';
+            updateValues.push(title);
+        }
+        if (description !== undefined) {
+            updateQuery += 'description = ?, ';
+            updateValues.push(description);
+        }
+        if (price) {
+            updateQuery += 'price = ?, ';
+            updateValues.push(price);
+        }
+        if (category) {
+            updateQuery += 'category = ?, ';
+            updateValues.push(category);
+        }
+        if (imagesJson) {
+            updateQuery += 'images = ?, ';
+            updateValues.push(imagesJson);
+        }
+        if (stock !== undefined) {
+            updateQuery += 'stock = ?, ';
+            updateValues.push(stock);
+        }
+
+        // Remove trailing comma and space
+        updateQuery = updateQuery.slice(0, -2);
+        updateQuery += ' WHERE id = ?';
+        updateValues.push(id);
+
+        const [result] = await db.query(updateQuery, updateValues);
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ success: false, message: 'Product not found' });
